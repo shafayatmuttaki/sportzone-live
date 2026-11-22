@@ -3,78 +3,99 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SportZone Live - Scores & Live TV</title>
+  <title>SportZone Pro - Cricinfo Style Live & TV</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #0b0f19;
-      --card-bg: #151c2c;
+      --bg-dark: #090d16;
+      --surface: #111827;
+      --card-bg: #161f33;
+      --border: #232f46;
       --accent: #00e676;
-      --accent-red: #ff3d57;
-      --accent-blue: #38bdf8;
-      --text-main: #ffffff;
+      --accent-blue: #0ea5e9;
+      --accent-red: #f43f5e;
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Hind Siliguri', sans-serif; }
-    body { background: var(--bg-dark); color: var(--text-main); padding-bottom: 80px; }
+    body { background: var(--bg-dark); color: var(--text-main); padding-bottom: 75px; }
 
+    /* Top App Bar */
     header {
-      background: #111827;
-      padding: 14px 16px;
+      background: linear-gradient(90deg, #0f172a, #111827);
+      padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #1f2937;
+      border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 100;
     }
-    .logo { font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
+    .logo { font-size: 20px; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 6px; }
     .logo span { color: #fff; }
-    .live-badge {
-      background: var(--accent-red);
-      color: #fff;
+    .live-pill {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-red);
+      border: 1px solid rgba(244, 63, 94, 0.4);
       font-size: 11px;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 12px;
-      animation: pulse 1.5s infinite;
+      padding: 3px 10px;
+      border-radius: 20px;
     }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-    .tabs {
+    /* Main Bottom/Top Navigation */
+    .main-nav {
       display: flex;
-      background: #111827;
-      padding: 8px 12px;
-      gap: 8px;
-      overflow-x: auto;
-      border-bottom: 1px solid #1f2937;
+      background: var(--surface);
+      padding: 6px 10px;
+      gap: 6px;
+      border-bottom: 1px solid var(--border);
       position: sticky;
-      top: 53px;
+      top: 52px;
       z-index: 99;
     }
-    .tab-btn {
+    .nav-btn {
       flex: 1;
-      padding: 8px 12px;
+      padding: 8px 6px;
       border: none;
       border-radius: 8px;
-      background: var(--card-bg);
+      background: transparent;
       color: var(--text-muted);
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
-      white-space: nowrap;
     }
-    .tab-btn.active { background: var(--accent); color: #000; }
+    .nav-btn.active { background: var(--accent); color: #000; font-weight: 700; }
 
-    .container { padding: 14px; max-width: 720px; margin: auto; }
+    .container { padding: 12px; max-width: 760px; margin: auto; }
     .section { display: none; }
     .section.active { display: block; }
-    .section-title { font-size: 16px; font-weight: 700; margin: 14px 0 10px; color: #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
 
-    /* Sub-filters for Cricbuzz Style Scores */
-    .filter-pills { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; }
+    /* Horizontal Featured Matches Slider (Cricinfo Top Strip) */
+    .featured-strip {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .featured-strip::-webkit-scrollbar { display: none; }
+    .mini-card {
+      min-width: 245px;
+      background: linear-gradient(145deg, #161f33, #111827);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .mini-card:active { border-color: var(--accent); }
+
+    /* Filter Pills */
+    .filter-row { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; }
     .pill {
       padding: 5px 14px;
       border-radius: 20px;
@@ -82,207 +103,183 @@
       color: var(--text-muted);
       font-size: 12px;
       font-weight: 600;
-      border: 1px solid #1f2937;
+      border: 1px solid var(--border);
       cursor: pointer;
+      white-space: nowrap;
     }
     .pill.active { background: var(--accent-blue); color: #000; border-color: var(--accent-blue); }
 
-    /* Cricbuzz Style Match Card */
+    /* Match Card */
     .match-card {
       background: var(--card-bg);
       border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
-      border: 1px solid #1f2937;
+      padding: 13px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
       cursor: pointer;
-      transition: 0.2s;
     }
-    .match-card:active { transform: scale(0.99); border-color: var(--accent); }
-    .match-meta { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
-    .status-tag { padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 10px; text-transform: uppercase; }
-    .tag-live { background: rgba(255, 61, 87, 0.2); color: var(--accent-red); }
-    .tag-upcoming { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); }
-    .tag-result { background: rgba(0, 230, 118, 0.15); color: var(--accent); }
+    .match-card:hover { border-color: #334155; }
+    .m-top { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+    .badge { padding: 2px 7px; border-radius: 4px; font-weight: 700; font-size: 10px; }
+    .b-live { background: rgba(244,63,94,0.2); color: var(--accent-red); }
+    .b-up { background: rgba(14,165,233,0.2); color: var(--accent-blue); }
+    .b-res { background: rgba(0,230,118,0.15); color: var(--accent); }
 
-    .team-line { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; font-size: 15px; font-weight: 700; }
-    .team-name { display: flex; align-items: center; gap: 8px; }
-    .team-logo { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; background: #263147; }
-    .team-score { color: #fff; font-size: 14px; }
-    .match-note { font-size: 12px; color: var(--accent); margin-top: 8px; padding-top: 8px; border-top: 1px solid #1f2937; }
+    .t-row { display: flex; justify-content: space-between; align-items: center; margin: 5px 0; font-size: 14px; font-weight: 700; }
+    .t-left { display: flex; align-items: center; gap: 8px; }
+    .t-img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; background: #1e293b; }
+    .m-status { font-size: 12px; color: var(--accent); margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
 
-    /* Match Detail Modal */
-    .modal-backdrop {
+    /* FULL SCREEN MATCH CENTER MODAL (Cricinfo Detail View) */
+    .full-modal {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-dark);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .modal-header {
+      background: var(--surface);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .back-btn {
+      background: var(--card-bg);
+      color: #fff;
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .sub-tabs {
+      display: flex;
+      background: #0f172a;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 53px;
+      z-index: 9;
+    }
+    .sub-tab {
+      flex: 1;
+      padding: 10px 6px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+    }
+    .sub-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .modal-body { padding: 14px; max-width: 760px; margin: 0 auto; width: 100%; padding-bottom: 80px; }
+
+    /* Scorecard Tables */
+    .inning-box { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 14px; overflow: hidden; }
+    .inning-head { background: #1e293b; padding: 10px 12px; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; color: var(--accent); }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: #111827; color: var(--text-muted); text-align: left; padding: 8px 10px; font-weight: 600; }
+    td { padding: 8px 10px; border-top: 1px solid var(--border); vertical-align: top; }
+    .num { text-align: right; font-weight: 600; }
+    .player-link { color: #38bdf8; font-weight: 700; cursor: pointer; text-decoration: underline; }
+    .dismissal { display: block; font-size: 11px; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
+
+    /* Squad Grid */
+    .squad-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .player-card {
+      background: var(--card-bg);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .player-card:active { border-color: var(--accent); }
+    .p-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: #1e293b; }
+
+    /* Player Career Popup */
+    .career-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.85);
+      z-index: 2000;
       display: none;
-      justify-content: center;
-      align-items: flex-end;
-      z-index: 1000;
-    }
-    .modal-box {
-      background: #111827;
-      width: 100%;
-      max-width: 720px;
-      border-radius: 18px 18px 0 0;
-      padding: 20px;
-      border-top: 2px solid var(--accent);
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    .modal-close { float: right; background: #1f2937; color: #fff; border: none; padding: 4px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-
-    /* Video Player & 10-Sec Ad Overlay */
-    .player-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: #000;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 10px;
-      border: 1px solid #263147;
-    }
-    video, iframe { width: 100%; height: 100%; border: none; }
-    .now-playing-bar {
-      background: #111827;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      color: var(--accent);
-      margin-bottom: 14px;
-      border: 1px solid #1f2937;
-    }
-
-    #adOverlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(11, 15, 25, 0.96);
-      display: none;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
       padding: 16px;
-      text-align: center;
-      z-index: 20;
     }
-    .ad-box-demo {
-      width: 90%;
-      max-width: 320px;
-      height: 110px;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border: 1px dashed var(--accent);
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 12px;
-      padding: 10px;
-    }
-    .countdown-pill {
-      background: #1f2937;
-      color: var(--accent);
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
+    .career-box {
+      background: var(--surface);
+      width: 100%;
+      max-width: 480px;
+      border-radius: 14px;
+      border: 1px solid var(--accent);
+      padding: 18px;
+      max-height: 85vh;
+      overflow-y: auto;
     }
 
-    /* Search Input */
-    .search-box {
-      width: 100%;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #263147;
-      background: #111827;
-      color: #fff;
-      font-size: 14px;
-      margin-bottom: 12px;
-      outline: none;
-    }
-    .search-box:focus { border-color: var(--accent); }
+    /* Video Player & Ad */
+    .player-wrapper { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 10px; border: 1px solid var(--border); }
+    video, iframe { width: 100%; height: 100%; border: none; }
+    #adOverlay { position: absolute; inset: 0; background: rgba(9, 13, 22, 0.96); display: none; flex-direction: column; justify-content: center; align-items: center; padding: 16px; text-align: center; z-index: 20; }
+    .ad-box-demo { width: 90%; max-width: 320px; height: 110px; background: #1e293b; border: 1px dashed var(--accent); border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 12px; }
+    .countdown-pill { background: #1f2937; color: var(--accent); padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; }
 
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .card {
-      background: var(--card-bg);
-      border-radius: 10px;
-      padding: 12px;
-      border: 1px solid #1f2937;
-      cursor: pointer;
-    }
-    .card:active { transform: scale(0.98); border-color: var(--accent); }
-    .card-tag { font-size: 11px; color: var(--accent); font-weight: 600; margin-bottom: 4px; display: block; }
-    .card-title { font-size: 13px; font-weight: 700; line-height: 1.3; word-break: break-word; }
-    .card-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .card { background: var(--card-bg); border-radius: 10px; padding: 12px; border: 1px solid var(--border); cursor: pointer; }
+    .search-box { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: #fff; font-size: 14px; margin-bottom: 12px; }
 
-    .yt-card {
-      display: flex;
-      gap: 10px;
-      background: var(--card-bg);
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #1f2937;
-      cursor: pointer;
-    }
-    .yt-thumb { width: 115px; height: 68px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #000; }
-    .yt-info h4 { font-size: 13px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .yt-info span { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block; }
+    .yt-card { display: flex; gap: 10px; background: var(--card-bg); padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
+    .yt-thumb { width: 115px; height: 68px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
 
-    .bottom-ad-banner {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 58px;
-      background: #111827;
-      border-top: 1px solid #263147;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
+    .bottom-ad-banner { position: fixed; bottom: 0; left: 0; right: 0; height: 56px; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: center; align-items: center; z-index: 999; font-size: 12px; color: var(--text-muted); }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="logo">Sport<span>Zone</span></div>
-    <div class="live-badge">● CRICBUZZ & 100+ TV</div>
+    <div class="logo">⚡ Sport<span>Zone Pro</span></div>
+    <div class="live-pill">● CRICINFO LIVE</div>
   </header>
 
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('scores', this)">🏏 Live Scores</button>
-    <button class="tab-btn" onclick="switchTab('livetv', this)">📺 Live TV (100+)</button>
-    <button class="tab-btn" onclick="switchTab('youtube', this)">🎬 Highlights</button>
+  <div class="main-nav">
+    <button class="nav-btn active" onclick="switchMainTab('matchesTab', this)">🏏 Matches</button>
+    <button class="nav-btn" onclick="switchMainTab('livetvTab', this)">📺 Live TV (100+)</button>
+    <button class="nav-btn" onclick="switchMainTab('highlightsTab', this)">🎬 Videos</button>
   </div>
 
   <div class="container">
-    <!-- TAB 1: CRICBUZZ STYLE LIVE SCORES -->
-    <div id="scores" class="section active">
-      <div class="section-title">
-        <span>📊 ম্যাচ সেন্টার (অটো আপডেট)</span>
-        <button onclick="fetchLiveCricketScores()" style="background:#1f2937; color:#00e676; border:none; padding:4px 10px; border-radius:6px; font-size:12px; cursor:pointer;">↻ Refresh</button>
+    <!-- TAB 1: CRICINFO STYLE MATCH CENTER -->
+    <div id="matchesTab" class="section active">
+      <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:8px;">🔥 ফিচার্ড ম্যাচসমূহ (ক্লিক করে ফুল স্কোরকার্ড দেখুন)</div>
+      <div class="featured-strip" id="featuredStrip"></div>
+
+      <div class="filter-row">
+        <button class="pill active" onclick="filterMatches('all', this)">সব ম্যাচ</button>
+        <button class="pill" onclick="filterMatches('live', this)">🔴 লাইভ</button>
+        <button class="pill" onclick="filterMatches('upcoming', this)">🗓️ আসন্ন</button>
+        <button class="pill" onclick="filterMatches('result', this)">✅ ফলাফল</button>
+        <button class="pill" onclick="loadMatches(true)" style="color:var(--accent);">↻ রিফ্রেশ</button>
       </div>
 
-      <div class="filter-pills">
-        <button class="pill active" onclick="filterMatches('all', this)">সব ম্যাচ (All)</button>
-        <button class="pill" onclick="filterMatches('live', this)">🔴 লাইভ (Live)</button>
-        <button class="pill" onclick="filterMatches('upcoming', this)">🗓️ আসন্ন (Upcoming)</button>
-        <button class="pill" onclick="filterMatches('result', this)">✅ ফলাফল (Recent)</button>
-      </div>
-
-      <div id="scoreList">ম্যাচের তথ্য লোড হচ্ছে...</div>
+      <div id="matchList">লোড হচ্ছে...</div>
     </div>
 
-    <!-- TAB 2: LIVE TV (FEATURED FAST + AUTO 100+ IPTV-ORG CHANNELS) -->
-    <div id="livetv" class="section">
+    <!-- TAB 2: LIVE TV & 10-SEC PRE-ROLL AD -->
+    <div id="livetvTab" class="section">
       <div class="player-wrapper">
         <div id="adOverlay">
-          <div class="ad-box-demo" id="preRollAdSlot">
+          <div class="ad-box-demo">
             <strong style="color:#00e676; font-size:14px;">SPONSORED AD (300x100)</strong>
             <span style="font-size:11px; color:#94a3b8; margin-top:4px;">আপনার অ্যাড নেটওয়ার্কের ব্যানার এখানে দেখাবে</span>
           </div>
@@ -290,64 +287,104 @@
         </div>
         <video id="hlsPlayer" controls playsinline></video>
       </div>
-      <div class="now-playing-bar" id="nowPlayingText">📡 নিচের যেকোনো চ্যানেলে ক্লিক করুন (১০ সেকেন্ড পর চলবে)</div>
+      <div id="nowPlayingText" style="background:var(--surface); padding:8px 12px; border-radius:8px; font-size:13px; color:var(--accent); margin-bottom:14px; border:1px solid var(--border);">📡 নিচের যেকোনো চ্যানেলে ক্লিক করুন (১০ সেকেন্ড পর চলবে)</div>
 
-      <!-- PART 1: FEATURED FAST CHANNELS -->
-      <div class="section-title">⭐ বাছাইকৃত সেরা ফাস্ট স্পোর্টস চ্যানেল</div>
-      <div class="grid" id="channelGrid"></div>
+      <div style="font-size:15px; font-weight:700; margin-bottom:10px;">⭐ বাছাইকৃত সেরা ফাস্ট স্পোর্টস চ্যানেল</div>
+      <div class="grid" id="featuredTvGrid"></div>
 
-      <!-- PART 2: AUTO-LOADED 100+ FREE SPORTS CHANNELS -->
-      <div class="section-title" style="margin-top: 22px;">
+      <div style="font-size:15px; font-weight:700; margin:20px 0 10px; display:flex; justify-content:space-between;">
         <span>🌍 অটো-লোডেড সব ফ্রি স্পোর্টস চ্যানেল</span>
-        <span id="autoCountBadge" style="font-size:12px; color:#00e676;">লোড হচ্ছে...</span>
+        <span id="autoCountBadge" style="font-size:12px; color:var(--accent);">লোড হচ্ছে...</span>
       </div>
-      <input type="text" id="channelSearch" class="search-box" placeholder="🔍 চ্যানেলের নাম লিখে খুঁজুন (যেমন: Cricket, Football, Sports, Racing)..." onkeyup="filterAutoChannels()">
+      <input type="text" id="channelSearch" class="search-box" placeholder="🔍 চ্যানেল খুঁজুন (Cricket, Football, Racing)..." onkeyup="filterAutoChannels()">
       <div class="grid" id="autoChannelGrid"></div>
     </div>
 
-    <!-- TAB 3: AUTO-UPDATING YOUTUBE LIVE & HIGHLIGHTS -->
-    <div id="youtube" class="section">
-      <div class="player-wrapper">
-        <iframe id="ytPlayer" src="" allowfullscreen></iframe>
-      </div>
-      <div class="section-title">⚡ অটো-আপডেটেড অফিসিয়াল হাইলাইটস ও লাইভ</div>
+    <!-- TAB 3: AUTO HIGHLIGHTS -->
+    <div id="highlightsTab" class="section">
+      <div class="player-wrapper"><iframe id="ytPlayer" src="" allowfullscreen></iframe></div>
+      <div style="font-size:15px; font-weight:700; margin-bottom:10px;">⚡ অফিসিয়াল হাইলাইটস ও লাইভ ভিডিও</div>
       <div id="ytList">লোড হচ্ছে...</div>
     </div>
   </div>
 
-  <!-- Match Details Popup Modal -->
-  <div class="modal-backdrop" id="matchModal" onclick="closeModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="document.getElementById('matchModal').style.display='none'">✕ বন্ধ করুন</button>
-      <div id="modalContent"></div>
+  <!-- FULL MATCH DETAIL VIEW (SCORECARD, SQUADS, VENUE & RECORDS) -->
+  <div class="full-modal" id="matchDetailModal">
+    <div class="modal-header">
+      <button class="back-btn" onclick="closeMatchDetail()">← ফিরে যান</button>
+      <div id="detailHeaderTitle" style="font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">ম্যাচ বিস্তারিত</div>
+    </div>
+
+    <div class="sub-tabs">
+      <div class="sub-tab active" onclick="switchSubTab('scorecardPane', this)">📊 Scorecard</div>
+      <div class="sub-tab" onclick="switchSubTab('squadsPane', this)">👥 Squads & Stats</div>
+      <div class="sub-tab" onclick="switchSubTab('infoPane', this)">🏟️ Stadium & Info</div>
+    </div>
+
+    <div class="modal-body">
+      <div id="scorecardPane" class="sub-pane">লোড হচ্ছে...</div>
+      <div id="squadsPane" class="sub-pane" style="display:none;">লোড হচ্ছে...</div>
+      <div id="infoPane" class="sub-pane" style="display:none;">লোড হচ্ছে...</div>
     </div>
   </div>
 
-  <!-- Sticky Bottom Banner Ad -->
-  <div class="bottom-ad-banner" id="bottomBannerAd">
+  <!-- PLAYER CAREER HISTORY MODAL -->
+  <div class="career-overlay" id="playerCareerModal" onclick="if(event.target.id==='playerCareerModal') this.style.display='none'">
+    <div class="career-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:13px; color:var(--accent); font-weight:700;">👤 প্লেয়ার ক্যারিয়ার রেকর্ড</span>
+        <button onclick="document.getElementById('playerCareerModal').style.display='none'" style="background:#1e293b; color:#fff; border:none; padding:4px 10px; border-radius:6px; cursor:pointer;">✕</button>
+      </div>
+      <div id="playerCareerContent">প্লেয়ারের হিস্ট্রি লোড হচ্ছে...</div>
+    </div>
+  </div>
+
+  <div class="bottom-ad-banner">
     <span>[ Banner Ad Space: 320x50 ]</span>
   </div>
 
   <script>
-    const CRIC_API_KEY = "25d6a156-f7a3-4f24-8985-6a08f1e96202";
-
-    let allMatchesData = [];
+    const API_KEY = "25d6a156-f7a3-4f24-8985-6a08f1e96202";
+    let allMatches = [];
     let currentFilter = 'all';
 
-    // ১. CricAPI থেকে আসল লাইভ স্কোর ও ম্যাচ তথ্য আনা
-    async function fetchLiveCricketScores() {
-      const scoreList = document.getElementById('scoreList');
+    // স্মার্ট ক্যাশিং (যাতে ফ্রি ১০০ API হিট সাশ্রয় হয়)
+    const cache = {};
+    async function fetchWithCache(url, force = false) {
+      if (!force && cache[url]) return cache[url];
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.status === "success") cache[url] = data;
+      return data;
+    }
+
+    // ১. ম্যাচ তালিকা লোড করা
+    async function loadMatches(force = false) {
+      const listEl = document.getElementById('matchList');
+      const stripEl = document.getElementById('featuredStrip');
       try {
-        const res = await fetch(`https://api.cricapi.com/v1/currentMatches?apikey=${CRIC_API_KEY}&offset=0`);
-        const json = await res.json();
+        const json = await fetchWithCache(`https://api.cricapi.com/v1/currentMatches?apikey=${API_KEY}&offset=0`, force);
         if (json.status === "success" && json.data) {
-          allMatchesData = json.data;
-          renderMatches();
+          allMatches = json.data;
+          // টপ ফিচার্ড স্লাইডার
+          stripEl.innerHTML = "";
+          allMatches.slice(0, 6).forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'mini-card';
+            div.innerHTML = `
+              <div style="font-size:10px; color:var(--accent); font-weight:700; margin-bottom:4px;">${m.matchType ? m.matchType.toUpperCase() : 'MATCH'} • ${m.matchStarted && !m.matchEnded ? '🔴 LIVE' : (m.matchEnded ? 'RESULT' : 'UPCOMING')}</div>
+              <div style="font-size:13px; font-weight:700; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</div>
+              <div style="font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.status}</div>
+            `;
+            div.onclick = () => openFullMatchCenter(m);
+            stripEl.appendChild(div);
+          });
+          renderMatchList();
         } else {
-          scoreList.innerHTML = "<p style='color:#94a3b8; font-size:13px;'>বর্তমানে কোনো ডেটা পাওয়া যায়নি বা API লিমিট শেষ হয়েছে।</p>";
+          listEl.innerHTML = `<p style="color:#94a3b8; font-size:13px;">তথ্য পাওয়া যায়নি (${json.reason || 'API Limit'})।</p>`;
         }
-      } catch (err) {
-        scoreList.innerHTML = "<p style='color:#94a3b8; font-size:13px;'>ইন্টারনেট সংযোগ চেক করুন।</p>";
+      } catch (e) {
+        listEl.innerHTML = `<p style="color:#94a3b8; font-size:13px;">ইন্টারনেট সংযোগ চেক করুন।</p>`;
       }
     }
 
@@ -355,14 +392,13 @@
       currentFilter = type;
       document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
-      renderMatches();
+      renderMatchList();
     }
 
-    function renderMatches() {
-      const scoreList = document.getElementById('scoreList');
-      scoreList.innerHTML = "";
-
-      const filtered = allMatchesData.filter(m => {
+    function renderMatchList() {
+      const listEl = document.getElementById('matchList');
+      listEl.innerHTML = "";
+      const filtered = allMatches.filter(m => {
         if (currentFilter === 'all') return true;
         if (currentFilter === 'live') return m.matchStarted && !m.matchEnded;
         if (currentFilter === 'upcoming') return !m.matchStarted;
@@ -370,89 +406,207 @@
         return true;
       });
 
-      if (filtered.length === 0) {
-        scoreList.innerHTML = "<p style='color:#94a3b8; font-size:13px; text-align:center; padding:20px;'>এই ক্যাটাগরিতে এখন কোনো ম্যাচ নেই।</p>";
+      if (!filtered.length) {
+        listEl.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">এই ক্যাটাগরিতে কোনো ম্যাচ নেই।</p>`;
         return;
       }
 
-      filtered.forEach(match => {
-        let tagClass = 'tag-upcoming';
-        let tagText = 'UPCOMING';
-        if (match.matchStarted && !match.matchEnded) { tagClass = 'tag-live'; tagText = '● LIVE'; }
-        else if (match.matchEnded) { tagClass = 'tag-result'; tagText = 'RESULT'; }
+      filtered.forEach(m => {
+        const isLive = m.matchStarted && !m.matchEnded;
+        const badge = isLive ? `<span class="badge b-live">● LIVE</span>` : (m.matchEnded ? `<span class="badge b-res">RESULT</span>` : `<span class="badge b-up">UPCOMING</span>`);
+        const t1 = m.teamInfo && m.teamInfo[0] ? m.teamInfo[0] : { name: m.teams[0] || 'Team 1', img: '' };
+        const t2 = m.teamInfo && m.teamInfo[1] ? m.teamInfo[1] : { name: m.teams[1] || 'Team 2', img: '' };
 
-        const t1 = match.teamInfo && match.teamInfo[0] ? match.teamInfo[0] : { name: match.teams[0] || 'Team A', img: '' };
-        const t2 = match.teamInfo && match.teamInfo[1] ? match.teamInfo[1] : { name: match.teams[1] || 'Team B', img: '' };
-
-        let s1 = "", s2 = "";
-        if (match.score && match.score.length > 0) {
-          match.score.forEach(sc => {
-            if (sc.inning.toLowerCase().includes(t1.name.toLowerCase())) {
-              s1 += `${sc.r}/${sc.w} (${sc.o}) `;
-            } else {
-              s2 += `${sc.r}/${sc.w} (${sc.o}) `;
-            }
+        let s1 = "-", s2 = "-";
+        if (m.score && m.score.length) {
+          s1 = ""; s2 = "";
+          m.score.forEach(sc => {
+            if (sc.inning.toLowerCase().includes(t1.name.toLowerCase())) s1 += `${sc.r}/${sc.w} (${sc.o}) `;
+            else s2 += `${sc.r}/${sc.w} (${sc.o}) `;
           });
         }
 
         const card = document.createElement('div');
         card.className = 'match-card';
         card.innerHTML = `
-          <div class="match-meta">
-            <span>${match.matchType ? match.matchType.toUpperCase() : 'MATCH'} • ${match.name.split(',')[1] || ''}</span>
-            <span class="status-tag ${tagClass}">${tagText}</span>
-          </div>
-          <div class="team-line">
-            <div class="team-name">
-              ${t1.img ? `<img class="team-logo" src="${t1.img}">` : ''}
-              <span>${t1.shortname || t1.name}</span>
-            </div>
-            <span class="team-score">${s1 || '-'}</span>
-          </div>
-          <div class="team-line">
-            <div class="team-name">
-              ${t2.img ? `<img class="team-logo" src="${t2.img}">` : ''}
-              <span>${t2.shortname || t2.name}</span>
-            </div>
-            <span class="team-score">${s2 || '-'}</span>
-          </div>
-          <div class="match-note">${match.status}</div>
+          <div class="m-top"><span>${m.matchType ? m.matchType.toUpperCase() : 'CRICKET'} • ${m.date}</span>${badge}</div>
+          <div class="t-row"><div class="t-left">${t1.img ? `<img class="t-img" src="${t1.img}">` : ''}<span>${t1.shortname || t1.name}</span></div><span>${s1 || '-'}</span></div>
+          <div class="t-row"><div class="t-left">${t2.img ? `<img class="t-img" src="${t2.img}">` : ''}<span>${t2.shortname || t2.name}</span></div><span>${s2 || '-'}</span></div>
+          <div class="m-status"><span>${m.status}</span><span style="color:var(--accent-blue); font-weight:700;">Scorecard ➔</span></div>
         `;
-        card.onclick = () => openMatchDetails(match);
-        scoreList.appendChild(card);
+        card.onclick = () => openFullMatchCenter(m);
+        listEl.appendChild(card);
       });
     }
 
-    function openMatchDetails(match) {
-      const modal = document.getElementById('matchModal');
-      const content = document.getElementById('modalContent');
-      let inningsHtml = '<p style="color:#94a3b8; font-size:13px;">ইনিংস স্কোর এখনো শুরু হয়নি।</p>';
-      if (match.score && match.score.length > 0) {
-        inningsHtml = match.score.map(sc => `
-          <div style="background:#151c2c; padding:10px; border-radius:8px; margin-top:8px;">
-            <div style="font-size:12px; color:#94a3b8;">${sc.inning}</div>
-            <div style="font-size:16px; font-weight:700; color:#00e676;">${sc.r} রান / ${sc.w} উইকেট (${sc.o} ওভার)</div>
-          </div>
-        `).join('');
+    // ২. পূর্ণাঙ্গ ম্যাচ সেন্টার (ফুল ব্যাটিং/বোলিং স্কোরকার্ড + স্কোয়াড + স্টেডিয়াম রেকর্ড)
+    async function openFullMatchCenter(match) {
+      const modal = document.getElementById('matchDetailModal');
+      document.getElementById('detailHeaderTitle').innerText = match.name;
+      modal.style.display = 'flex';
+
+      const scPane = document.getElementById('scorecardPane');
+      const sqPane = document.getElementById('squadsPane');
+      const inPane = document.getElementById('infoPane');
+
+      scPane.innerHTML = `<p style="color:var(--accent); font-size:13px;">ফুল ব্যাটিং ও বোলিং স্কোরকার্ড লোড হচ্ছে...</p>`;
+      sqPane.innerHTML = `<p style="color:var(--accent); font-size:13px;">দুই দলের স্কোয়াড ও প্লেয়ার তালিকা লোড হচ্ছে...</p>`;
+
+      // ট্যাব ৩: স্টেডিয়াম ও ম্যাচের রেকর্ড/তথ্য
+      inPane.innerHTML = `
+        <div class="inning-box" style="padding:14px;">
+          <h3 style="font-size:15px; color:var(--accent); margin-bottom:10px;">🏟️ স্টেডিয়াম ও ম্যাচ তথ্য</h3>
+          <p style="font-size:13px; margin-bottom:8px;"><strong>ম্যাচ:</strong> ${match.name}</p>
+          <p style="font-size:13px; margin-bottom:8px;"><strong>ভেন্যু / স্টেডিয়াম:</strong> ${match.venue || 'তথ্য পাওয়া যায়নি'}</p>
+          <p style="font-size:13px; margin-bottom:8px;"><strong>ফরম্যাট:</strong> ${match.matchType ? match.matchType.toUpperCase() : 'N/A'}</p>
+          <p style="font-size:13px; margin-bottom:8px;"><strong>তারিখ:</strong> ${match.date}</p>
+          <p style="font-size:13px; color:var(--accent-blue);"><strong>বর্তমান অবস্থা:</strong> ${match.status}</p>
+        </div>
+      `;
+
+      // ট্যাব ১: ফুল ব্যাটিং ও বোলিং স্কোরকার্ড (match_scorecard API)
+      try {
+        const scJson = await fetchWithCache(`https://api.cricapi.com/v1/match_scorecard?apikey=${API_KEY}&id=${match.id}`);
+        if (scJson.status === "success" && scJson.data && scJson.data.scorecard && scJson.data.scorecard.length > 0) {
+          let html = `<div style="background:#1e293b; padding:10px; border-radius:8px; font-size:13px; color:var(--accent); margin-bottom:12px; font-weight:600;">${scJson.data.status}</div>`;
+          if (scJson.data.tossWinner) {
+            html += `<div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">🪙 টস: <strong>${scJson.data.tossWinner}</strong> টসে জিতে <strong>${scJson.data.tossChoice}</strong> নিয়েছে।</div>`;
+          }
+
+          scJson.data.scorecard.forEach(inn => {
+            // ব্যাটিং টেবিল
+            let batRows = (inn.batting || []).map(b => `
+              <tr>
+                <td>
+                  <span class="player-link" onclick="openPlayerCareer('${b.batsman.id}', '${b.batsman.name.replace(/'/g, "")}')">${b.batsman.name}</span>
+                  <span class="dismissal">${b['dismissal-text'] || 'not out'}</span>
+                </td>
+                <td class="num" style="color:#fff;">${b.r}</td>
+                <td class="num">${b.b}</td>
+                <td class="num">${b['4s']}</td>
+                <td class="num">${b['6s']}</td>
+                <td class="num">${b.sr}</td>
+              </tr>
+            `).join('');
+
+            // বোলিং টেবিল
+            let bowlRows = (inn.bowling || []).map(bw => `
+              <tr>
+                <td><span class="player-link" onclick="openPlayerCareer('${bw.bowler.id}', '${bw.bowler.name.replace(/'/g, "")}')">${bw.bowler.name}</span></td>
+                <td class="num">${bw.o}</td>
+                <td class="num">${bw.m}</td>
+                <td class="num">${bw.r}</td>
+                <td class="num" style="color:var(--accent);">${bw.w}</td>
+                <td class="num">${bw.eco}</td>
+              </tr>
+            `).join('');
+
+            html += `
+              <div class="inning-box">
+                <div class="inning-head"><span>${inn.inning}</span></div>
+                <table>
+                  <thead><tr><th>ব্যাটসম্যান (ক্লিক করে রেকর্ড দেখুন)</th><th class="num">R</th><th class="num">B</th><th class="num">4s</th><th class="num">6s</th><th class="num">SR</th></tr></thead>
+                  <tbody>${batRows || '<tr><td colspan="6">ব্যাটিং তথ্য নেই</td></tr>'}</tbody>
+                </table>
+                <table style="margin-top:6px;">
+                  <thead><tr><th>বোলার</th><th class="num">O</th><th class="num">M</th><th class="num">R</th><th class="num">W</th><th class="num">ECO</th></tr></thead>
+                  <tbody>${bowlRows || '<tr><td colspan="6">বোলিং তথ্য নেই</td></tr>'}</tbody>
+                </table>
+              </div>
+            `;
+          });
+          scPane.innerHTML = html;
+        } else {
+          scPane.innerHTML = `<div class="inning-box" style="padding:14px;"><p style="font-size:13px; color:var(--text-muted);">এই ম্যাচের বিস্তারিত বল-বাই-বল স্কোরকার্ড এখনো উপলব্ধ নয় (ম্যাচ শুরু হলে এখানে সব ব্যাটসম্যান ও বোলারের পূর্ণাঙ্গ তালিকা দেখাবে)।</p></div>`;
+        }
+      } catch (err) {
+        scPane.innerHTML = `<p style="color:var(--accent-red); font-size:13px;">স্কোরকার্ড লোড করতে সমস্যা হয়েছে।</p>`;
       }
 
-      content.innerHTML = `
-        <h3 style="font-size:16px; margin-bottom:6px; padding-right:70px;">${match.name}</h3>
-        <p style="font-size:12px; color:#94a3b8; margin-bottom:12px;">📍 ভেন্যু: ${match.venue || 'নির্ধারিত নয়'} | 📅 তারিখ: ${match.date}</p>
-        <div style="background:#1e293b; padding:10px; border-radius:8px; color:#38bdf8; font-size:13px; font-weight:600; margin-bottom:12px;">
-          ${match.status}
-        </div>
-        <h4 style="font-size:14px; margin-bottom:6px;">স্কোরকার্ড সারসংক্ষেপ:</h4>
-        ${inningsHtml}
-      `;
+      // ট্যাব ২: দুই দলের স্কোয়াড ও প্লেয়ার প্রোফাইল (match_squad API)
+      try {
+        const sqJson = await fetchWithCache(`https://api.cricapi.com/v1/match_squad?apikey=${API_KEY}&id=${match.id}`);
+        if (sqJson.status === "success" && sqJson.data && sqJson.data.length > 0) {
+          sqPane.innerHTML = sqJson.data.map(team => `
+            <div style="margin-bottom:16px;">
+              <h4 style="font-size:14px; color:var(--accent); margin-bottom:8px;">🏏 ${team.teamName} স্কোয়াড (প্লেয়ারের ওপর ক্লিক করুন)</h4>
+              <div class="squad-grid">
+                ${(team.players || []).map(p => `
+                  <div class="player-card" onclick="openPlayerCareer('${p.id}', '${p.name.replace(/'/g, "")}')">
+                    <img class="p-avatar" src="${p.playerImg || 'https://h.cricapi.com/img/icon512.png'}">
+                    <div>
+                      <div style="font-size:13px; font-weight:700; color:#fff;">${p.name}</div>
+                      <div style="font-size:11px; color:var(--text-muted);">${p.role || 'Player'}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('');
+        } else {
+          sqPane.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">এই ম্যাচের স্কোয়াড এখনো ঘোষণা করা হয়নি।</p>`;
+        }
+      } catch (err) {
+        sqPane.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">স্কোয়াড লোড করা যায়নি।</p>`;
+      }
+    }
+
+    // ৩. প্লেয়ারের নামের ওপর ক্লিক করলে তার সম্পূর্ণ টেস্ট/ওডিআই/টি-টোয়েন্টি ক্যারিয়ার হিস্ট্রি
+    async function openPlayerCareer(playerId, playerName) {
+      const modal = document.getElementById('playerCareerModal');
+      const box = document.getElementById('playerCareerContent');
       modal.style.display = 'flex';
+      box.innerHTML = `<p style="color:var(--accent); font-size:13px;"><strong>${playerName}</strong>-এর টেস্ট, ওডিআই ও টি-টোয়েন্টি ক্যারিয়ার রেকর্ড লোড হচ্ছে...</p>`;
+
+      try {
+        const res = await fetchWithCache(`https://api.cricapi.com/v1/players_info?apikey=${API_KEY}&id=${playerId}`);
+        if (res.status === "success" && res.data) {
+          const p = res.data;
+          let statsHtml = '';
+          if (p.stats && p.stats.length > 0) {
+            // ব্যাটিং ও বোলিং স্ট্যাটস সাজানো
+            const formats = ['test', 'odi', 't20i', 'ipl'];
+            formats.forEach(fmt => {
+              const fmtStats = p.stats.filter(s => s.matchtype === fmt);
+              if (fmtStats.length > 0) {
+                statsHtml += `<div style="margin-top:10px; background:#0f172a; padding:8px; border-radius:8px;">
+                  <div style="font-size:12px; font-weight:700; color:var(--accent-blue); text-transform:uppercase; margin-bottom:4px;">${fmt} ক্যারিয়ার</div>
+                  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; font-size:11px;">
+                    ${fmtStats.map(st => `<div><span style="color:var(--text-muted);">${st.fn} (${st.stat}):</span> <strong>${st.value}</strong></div>`).join('')}
+                  </div>
+                </div>`;
+              }
+            });
+          }
+
+          box.innerHTML = `
+            <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+              <img src="${p.playerImg || 'https://h.cricapi.com/img/icon512.png'}" style="width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--accent);">
+              <div>
+                <h3 style="font-size:16px;">${p.name}</h3>
+                <div style="font-size:12px; color:var(--text-muted);">${p.country || ''} • ${p.role || ''}</div>
+                <div style="font-size:11px; color:var(--accent);">ব্যাটিং: ${p.battingStyle || '-'} | বোলিং: ${p.bowlingStyle || '-'}</div>
+              </div>
+            </div>
+            ${statsHtml || '<p style="font-size:12px; color:var(--text-muted);">বিস্তারিত ক্যারিয়ার স্ট্যাটস পাওয়া যায়নি।</p>'}
+          `;
+        } else {
+          box.innerHTML = `<p style="font-size:13px; color:var(--text-muted);">প্লেয়ারের বিস্তারিত হিস্ট্রি পাওয়া যায়নি।</p>`;
+        }
+      } catch (e) {
+        box.innerHTML = `<p style="font-size:13px; color:var(--accent-red);">তথ্য লোড করতে সমস্যা হয়েছে।</p>`;
+      }
     }
 
-    function closeModal(e) {
-      if (e.target.id === 'matchModal') document.getElementById('matchModal').style.display = 'none';
+    function closeMatchDetail() { document.getElementById('matchDetailModal').style.display = 'none'; }
+    function switchSubTab(paneId, el) {
+      document.querySelectorAll('.sub-pane').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(paneId).style.display = 'block';
+      el.classList.add('active');
     }
 
-    // ২. বাছাই করা সেরা ১০টি ফাস্ট ও স্থায়ী বৈধ স্পোর্টস চ্যানেল
+    // ৪. LIVE TV (বাছাইকৃত সেরা + অটো ১০০+ চ্যানেল)
     const featuredChannels = [
       { name: "Red Bull TV (24/7 Sports)", category: "Live Sports", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8" },
       { name: "FIFA+ Live Football", category: "Football", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8" },
@@ -461,157 +615,107 @@
       { name: "Sharjah Sports HD", category: "Football & Sports", url: "https://svs.itworkscdn.net/smc4sportslive/smc4.smil/playlist.m3u8" },
       { name: "Trace Sport Stars", category: "Sports News", url: "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01076-tracetv-tracesport-samsunguk/playlist.m3u8" },
       { name: "Unbeaten Sports", category: "Multi-Sports", url: "https://unbeaten-roku.amagi.tv/playlist.m3u8" },
-      { name: "SportsGrid Live", category: "Sports Analysis", url: "https://sportsgrid-klowdtv.amagi.tv/playlist.m3u8" },
-      { name: "World Poker Tour", category: "Card & Mind Sports", url: "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/wpt/master.m3u8" },
-      { name: "Billiard TV (Snooker/Pool)", category: "Cue Sports", url: "https://billiardtv-klowdtv.amagi.tv/playlist.m3u8" }
+      { name: "SportsGrid Live", category: "Sports Analysis", url: "https://sportsgrid-klowdtv.amagi.tv/playlist.m3u8" }
     ];
 
-    let hls = null;
-    let adInterval = null;
-
-    const channelGrid = document.getElementById('channelGrid');
-    featuredChannels.forEach((ch) => {
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.innerHTML = `<span class="card-tag">★ ${ch.category}</span><div class="card-title">${ch.name}</div><div class="card-sub">Fast HD • Verified</div>`;
-      div.onclick = () => startChannelWithAd(ch.url, ch.name);
-      channelGrid.appendChild(div);
+    let hls = null, adInterval = null, autoChannelsList = [];
+    const fGrid = document.getElementById('featuredTvGrid');
+    featuredChannels.forEach(ch => {
+      const d = document.createElement('div');
+      d.className = 'card';
+      d.innerHTML = `<span style="font-size:11px; color:var(--accent); font-weight:700;">★ ${ch.category}</span><div style="font-size:13px; font-weight:700; margin-top:3px;">${ch.name}</div>`;
+      d.onclick = () => startChannelWithAd(ch.url, ch.name);
+      fGrid.appendChild(d);
     });
 
-    // ২.৫. অটো-লোডেড ১০০+ ফ্রি স্পোর্টস চ্যানেল (iptv-org ওপেন-সোর্স প্লেলিস্ট থেকে)
-    let autoChannelsList = [];
-
     async function loadAutoIptvChannels() {
-      const badge = document.getElementById('autoCountBadge');
       try {
         const res = await fetch("https://iptv-org.github.io/iptv/categories/sports.m3u");
-        const m3uText = await res.text();
-        const lines = m3uText.split('\n');
-        let currentName = "";
-
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (line.startsWith("#EXTINF:")) {
-            const parts = line.split(",");
-            currentName = parts[parts.length - 1].trim();
-          } else if (line.startsWith("http") && currentName) {
-            autoChannelsList.push({ name: currentName, url: line });
-            currentName = "";
-          }
-        }
-
-        badge.innerText = `${autoChannelsList.length} টি চ্যানেল রেডি`;
+        const lines = (await res.text()).split('\n');
+        let name = "";
+        lines.forEach(l => {
+          l = l.trim();
+          if (l.startsWith("#EXTINF:")) name = l.split(",").pop().trim();
+          else if (l.startsWith("http") && name) { autoChannelsList.push({ name, url: l }); name = ""; }
+        });
+        document.getElementById('autoCountBadge').innerText = `${autoChannelsList.length} টি রেডি`;
         renderAutoChannels(autoChannelsList.slice(0, 120));
-      } catch (e) {
-        badge.innerText = "লোড ব্যর্থ হয়েছে";
-      }
+      } catch (e) {}
     }
 
     function renderAutoChannels(list) {
-      const autoGrid = document.getElementById('autoChannelGrid');
-      autoGrid.innerHTML = "";
+      const g = document.getElementById('autoChannelGrid');
+      g.innerHTML = "";
       list.forEach(ch => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `<span class="card-tag" style="color:#38bdf8;">● AUTO FTA</span><div class="card-title">${ch.name}</div><div class="card-sub">Global Open Stream</div>`;
-        div.onclick = () => startChannelWithAd(ch.url, ch.name);
-        autoGrid.appendChild(div);
+        const d = document.createElement('div');
+        d.className = 'card';
+        d.innerHTML = `<span style="font-size:10px; color:var(--accent-blue); font-weight:700;">● FREE TV</span><div style="font-size:13px; font-weight:700; margin-top:3px;">${ch.name}</div>`;
+        d.onclick = () => startChannelWithAd(ch.url, ch.name);
+        g.appendChild(d);
       });
     }
 
     function filterAutoChannels() {
-      const query = document.getElementById('channelSearch').value.toLowerCase();
-      const filtered = autoChannelsList.filter(c => c.name.toLowerCase().includes(query));
-      renderAutoChannels(filtered.slice(0, 120));
+      const q = document.getElementById('channelSearch').value.toLowerCase();
+      renderAutoChannels(autoChannelsList.filter(c => c.name.toLowerCase().includes(q)).slice(0, 120));
     }
 
-    function startChannelWithAd(streamUrl, channelName) {
+    function startChannelWithAd(url, name) {
       const overlay = document.getElementById('adOverlay');
       const timerSpan = document.getElementById('timerCount');
       const video = document.getElementById('hlsPlayer');
-      const statusText = document.getElementById('nowPlayingText');
-
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      statusText.innerText = `⏳ লোড হচ্ছে: ${channelName}...`;
-
+      document.getElementById('nowPlayingText').innerText = `⏳ লোড হচ্ছে: ${name}...`;
       video.pause();
       clearInterval(adInterval);
-
-      let secondsLeft = 10;
-      timerSpan.innerText = secondsLeft;
+      let sec = 10;
+      timerSpan.innerText = sec;
       overlay.style.display = 'flex';
-
       adInterval = setInterval(() => {
-        secondsLeft--;
-        timerSpan.innerText = secondsLeft;
-        if (secondsLeft <= 0) {
+        sec--;
+        timerSpan.innerText = sec;
+        if (sec <= 0) {
           clearInterval(adInterval);
           overlay.style.display = 'none';
-          statusText.innerText = `▶️ এখন চলছে: ${channelName}`;
-          playHlsStream(streamUrl);
+          document.getElementById('nowPlayingText').innerText = `▶️ এখন চলছে: ${name}`;
+          if (Hls.isSupported()) {
+            if (hls) hls.destroy();
+            hls = new Hls(); hls.loadSource(url); hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+          } else { video.src = url; video.play(); }
         }
       }, 1000);
     }
 
-    function playHlsStream(url) {
-      const video = document.getElementById('hlsPlayer');
-      if (Hls.isSupported()) {
-        if (hls) hls.destroy();
-        hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = url;
-        video.play();
-      }
-    }
-
-    // ৩. অটোমেটিক ইউটিউব স্পোর্টস হাইলাইটস ও লাইভ
+    // ৫. ইউটিউব হাইলাইটস
     async function loadAutoYouTubeVideos() {
       const ytList = document.getElementById('ytList');
       const rssUrl = encodeURIComponent("https://www.youtube.com/feeds/videos.xml?channel_id=UCt2jxGk2fw704_7yX20r-2w");
       try {
-        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`);
-        const data = await res.json();
-        if (data.items && data.items.length > 0) {
+        const data = await (await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`)).json();
+        if (data.items && data.items.length) {
           ytList.innerHTML = "";
-          const firstVidId = data.items[0].guid.split(":")[2];
-          document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${firstVidId}`;
-
+          document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${data.items[0].guid.split(":")[2]}`;
           data.items.slice(0, 8).forEach(item => {
-            const vidId = item.guid.split(":")[2];
-            const card = document.createElement('div');
-            card.className = 'yt-card';
-            card.innerHTML = `
-              <img class="yt-thumb" src="https://i.ytimg.com/vi/${vidId}/mqdefault.jpg" alt="thumb">
-              <div class="yt-info">
-                <h4>${item.title}</h4>
-                <span>${item.author} • Auto Updated</span>
-              </div>
-            `;
-            card.onclick = () => {
-              document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${vidId}?autoplay=1`;
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            };
-            ytList.appendChild(card);
+            const vid = item.guid.split(":")[2];
+            const c = document.createElement('div');
+            c.className = 'yt-card';
+            c.innerHTML = `<img class="yt-thumb" src="https://i.ytimg.com/vi/${vid}/mqdefault.jpg"><div><h4 style="font-size:13px;">${item.title}</h4><span style="font-size:11px; color:var(--text-muted);">${item.author}</span></div>`;
+            c.onclick = () => { document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${vid}?autoplay=1`; window.scrollTo({ top: 0, behavior: 'smooth' }); };
+            ytList.appendChild(c);
           });
         }
-      } catch (e) {
-        ytList.innerHTML = "<p style='color:#94a3b8; font-size:13px;'>ইন্টারনেট সংযোগ চেক করুন।</p>";
-      }
+      } catch (e) {}
     }
 
-    function switchTab(tabId, btn) {
+    function switchMainTab(id, btn) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
       btn.classList.add('active');
     }
 
-    // সব ফিচার অটো চালু করা
-    fetchLiveCricketScores();
-    setInterval(fetchLiveCricketScores, 60000);
+    loadMatches();
     loadAutoIptvChannels();
     loadAutoYouTubeVideos();
   </script>
