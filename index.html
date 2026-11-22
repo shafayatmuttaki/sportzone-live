@@ -3,1140 +3,532 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SportZone Pro - Cricinfo Style Live, Scores & TV</title>
+  <title>SportZone Pro - Live Cricket, Scores & TV</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-main: #060913;
-      --surface: #0f172a;
-      --card-bg: #151f34;
-      --card-alt: #1b2742;
-      --border: rgba(56, 189, 248, 0.22);
-      --green: #00e676;
-      --blue: #38bdf8;
-      --purple: #a855f7;
-      --red: #ff3b5c;
-      --gold: #fbbf24;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --bg: #060913; --surface: #0f172a; --card: #151f34;
+      --border: rgba(56, 189, 248, 0.25); --green: #00e676;
+      --blue: #38bdf8; --red: #ff3b5c; --gold: #fbbf24;
+      --text: #f8fafc; --muted: #94a3b8;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Hind Siliguri', 'Noto Sans Devanagari', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body {
-      background: radial-gradient(circle at top right, #111e3b 0%, #060913 60%);
-      color: var(--text-main);
-      padding-bottom: 85px;
-      min-height: 100vh;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Hind Siliguri', 'Noto Sans Devanagari', sans-serif; }
+    body { background: radial-gradient(circle at top right, #111e3b 0%, #060913 60%); color: var(--text); padding-bottom: 75px; min-height: 100vh; }
 
-    /* Language Selection Splash Modal */
-    .lang-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(6, 9, 19, 0.96);
-      backdrop-filter: blur(12px);
-      z-index: 5000;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    .lang-box {
-      background: linear-gradient(145deg, #16213a, #0b1120);
-      border: 1px solid rgba(0, 230, 118, 0.45);
-      border-radius: 22px;
-      padding: 28px 22px;
-      width: 100%;
-      max-width: 390px;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0, 230, 118, 0.15);
-    }
-    .lang-option {
-      width: 100%;
-      padding: 14px 18px;
-      margin-top: 12px;
-      background: rgba(30, 41, 59, 0.8);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: 0.2s;
-    }
-    .lang-option:hover, .lang-option:active {
-      background: linear-gradient(90deg, rgba(0, 230, 118, 0.22), rgba(56, 189, 248, 0.22));
-      border-color: var(--green);
-      transform: translateY(-2px);
-    }
+    /* Language & Update Modals */
+    .overlay-modal { position: fixed; inset: 0; background: rgba(6,9,19,0.96); z-index: 5000; display: none; justify-content: center; align-items: center; padding: 20px; }
+    .modal-card { background: #16213a; border: 1px solid var(--green); border-radius: 20px; padding: 24px; width: 100%; max-width: 380px; text-align: center; }
+    .lang-btn { width: 100%; padding: 13px 16px; margin-top: 10px; background: #1e293b; border: 1px solid var(--border); border-radius: 12px; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; }
+    .lang-btn:hover { border-color: var(--green); background: rgba(0,230,118,0.15); }
 
-    /* Colorful Header */
-    header {
-      background: rgba(11, 17, 32, 0.94);
-      backdrop-filter: blur(12px);
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .brand { display: flex; align-items: center; gap: 10px; }
-    .brand-icon {
-      width: 35px;
-      height: 35px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--green), var(--blue));
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 18px;
-      color: #000;
-      font-weight: 800;
-      box-shadow: 0 4px 15px rgba(0, 230, 118, 0.35);
-    }
-    .brand-title { font-size: 19px; font-weight: 700; background: linear-gradient(90deg, #fff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .lang-switch-btn {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      color: var(--blue);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
+    header { background: rgba(11,17,32,0.95); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .brand { display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; color: var(--green); }
+    .lang-switch { background: #1e293b; color: var(--blue); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; }
 
-    /* Main Bottom/Top Navigation */
-    .main-nav {
-      display: flex;
-      background: rgba(15, 23, 42, 0.96);
-      padding: 8px 12px;
-      gap: 8px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 59px;
-      z-index: 99;
-    }
-    .nav-btn {
-      flex: 1;
-      padding: 10px 6px;
-      border: 1px solid transparent;
-      border-radius: 12px;
-      background: rgba(30, 41, 59, 0.55);
-      color: var(--text-muted);
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-      transition: 0.2s;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-    }
-    .nav-btn.active {
-      background: linear-gradient(135deg, var(--green), #059669);
-      color: #03110a;
-      box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
-    }
+    .main-nav { display: flex; background: var(--surface); padding: 8px 12px; gap: 8px; border-bottom: 1px solid var(--border); position: sticky; top: 53px; z-index: 99; }
+    .nav-btn { flex: 1; padding: 9px 6px; border: none; border-radius: 10px; background: rgba(30,41,59,0.6); color: var(--muted); font-weight: 700; font-size: 13px; cursor: pointer; }
+    .nav-btn.active { background: linear-gradient(135deg, var(--green), #059669); color: #000; }
 
     .container { padding: 14px; max-width: 780px; margin: auto; }
-    .section { display: none; animation: fadeIn 0.25s ease; }
+    .section { display: none; }
     .section.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Auto Live Match Stream & Countdown Spotlight */
-    .live-stream-spotlight {
-      background: linear-gradient(135deg, #1e1b4b 0%, #361134 55%, #0f172a 100%);
-      border: 1px solid rgba(255, 59, 92, 0.45);
-      border-radius: 16px;
-      padding: 13px;
-      margin-bottom: 16px;
-      box-shadow: 0 8px 25px rgba(255, 59, 92, 0.15);
-    }
-    .spotlight-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .live-pulse-tag {
-      background: var(--red);
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 20px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.55; } 100% { opacity: 1; } }
+    /* Live Stream Spotlight */
+    .spotlight { background: linear-gradient(135deg, #1e1b4b, #361134, #0f172a); border: 1px solid rgba(255,59,92,0.45); border-radius: 14px; padding: 12px; margin-bottom: 14px; }
+    .live-tag { background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
+    .stream-row { background: rgba(10,15,28,0.8); border-radius: 10px; padding: 10px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .watch-btn { background: var(--red); color: #fff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .cd-box { background: rgba(56,189,248,0.15); color: var(--blue); padding: 5px 9px; border-radius: 8px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 
-    .stream-event-card {
-      background: rgba(10, 15, 28, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 10px 12px;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-    .stream-event-card:last-child { margin-bottom: 0; }
-    .watch-now-btn {
-      background: linear-gradient(135deg, #ff3b5c, #e11d48);
-      color: #fff;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 4px 12px rgba(255, 59, 92, 0.4);
-    }
-    .countdown-box {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      color: var(--blue);
-      padding: 6px 10px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .sec-head { font-size: 15px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; color: #f1f5f9; }
-
-    /* Horizontal Featured Matches Slider */
-    .featured-strip { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; scrollbar-width: none; }
-    .featured-strip::-webkit-scrollbar { display: none; }
-    .mini-card {
-      min-width: 245px;
-      background: linear-gradient(145deg, #182540, #0f172a);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      border-radius: 14px;
-      padding: 12px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .mini-card:active { border-color: var(--green); }
-
-    /* Filter Pills */
-    .filter-row { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
-    .pill {
-      padding: 7px 15px;
-      border-radius: 20px;
-      background: var(--surface);
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 700;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .pill.active {
-      background: linear-gradient(135deg, var(--blue), #0284c7);
-      color: #fff;
-      border-color: transparent;
-      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
-    }
+    /* Slider & Filters */
+    .strip { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; }
+    .mini-card { min-width: 240px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 11px; cursor: pointer; flex-shrink: 0; }
+    .filters { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; }
+    .pill { padding: 6px 14px; border-radius: 20px; background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 700; border: 1px solid var(--border); cursor: pointer; white-space: nowrap; }
+    .pill.active { background: var(--blue); color: #000; }
 
     /* Match Card */
-    .match-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 14px;
-      margin-bottom: 12px;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
-    }
-    .match-card:active { transform: scale(0.99); border-color: var(--green); }
-    .m-top { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
-    .badge { padding: 3px 9px; border-radius: 6px; font-weight: 700; font-size: 10px; }
-    .b-live { background: rgba(255, 59, 92, 0.2); color: var(--red); border: 1px solid rgba(255, 59, 92, 0.4); }
-    .b-up { background: rgba(56, 189, 248, 0.2); color: var(--blue); }
-    .b-res { background: rgba(0, 230, 118, 0.15); color: var(--green); }
+    .match-card { background: var(--card); border-radius: 14px; padding: 13px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
+    .m-top { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .badge { padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 10px; }
+    .b-live { background: rgba(255,59,92,0.2); color: var(--red); }
+    .b-up { background: rgba(56,189,248,0.2); color: var(--blue); }
+    .b-res { background: rgba(0,230,118,0.15); color: var(--green); }
+    .t-row { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; font-size: 15px; font-weight: 700; }
+    .t-left { display: flex; align-items: center; gap: 8px; }
+    .t-img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #1e293b; }
+    .m-status { font-size: 12px; color: var(--gold); margin-top: 8px; padding-top: 7px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; }
 
-    .t-row { display: flex; justify-content: space-between; align-items: center; margin: 7px 0; font-size: 15px; font-weight: 700; }
-    .t-left { display: flex; align-items: center; gap: 10px; }
-    .t-img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); }
-    .m-status { font-size: 12px; color: var(--gold); margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
+    /* Match Detail Modal */
+    .full-modal { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: none; flex-direction: column; overflow-y: auto; }
+    .modal-head { background: var(--surface); padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+    .back-btn { background: #1e293b; color: var(--green); border: 1px solid var(--green); padding: 5px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .sub-tabs { display: flex; background: #0b101d; border-bottom: 1px solid var(--border); position: sticky; top: 53px; z-index: 9; }
+    .sub-tab { flex: 1; padding: 10px 6px; text-align: center; font-size: 12px; font-weight: 700; color: var(--muted); border-bottom: 3px solid transparent; cursor: pointer; }
+    .sub-tab.active { color: var(--green); border-bottom-color: var(--green); }
+    .modal-body { padding: 14px; max-width: 780px; margin: 0 auto; width: 100%; padding-bottom: 80px; }
 
-    /* FULL MATCH CENTER MODAL (Cricinfo Detail View) */
-    .full-modal { position: fixed; inset: 0; background: var(--bg-main); z-index: 1000; display: none; flex-direction: column; overflow-y: auto; }
-    .modal-header { background: var(--surface); padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
-    .back-btn { background: linear-gradient(135deg, #1e293b, #0f172a); color: var(--green); border: 1px solid rgba(0, 230, 118, 0.35); padding: 6px 14px; border-radius: 10px; font-weight: 700; cursor: pointer; }
-    .sub-tabs { display: flex; background: #0b101d; border-bottom: 1px solid var(--border); position: sticky; top: 55px; z-index: 9; overflow-x: auto; }
-    .sub-tab { flex: 1; padding: 11px 8px; text-align: center; font-size: 12px; font-weight: 700; color: var(--text-muted); border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; }
-    .sub-tab.active { color: var(--green); border-bottom-color: var(--green); background: rgba(0, 230, 118, 0.06); }
-    .modal-body { padding: 14px; max-width: 780px; margin: 0 auto; width: 100%; padding-bottom: 85px; }
-
-    /* Summary Cards & Tables */
-    .summary-hero {
-      background: linear-gradient(135deg, #16223b, #0f172a);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-    .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
-    .info-chip { background: rgba(10, 15, 28, 0.7); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); }
-    .info-chip span { display: block; font-size: 11px; color: var(--text-muted); }
-    .info-chip strong { font-size: 13px; color: #fff; }
-
-    .inning-box { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); margin-bottom: 14px; overflow: hidden; }
-    .inning-head { background: linear-gradient(90deg, #1e293b, #0f172a); padding: 10px 14px; font-weight: 700; font-size: 13px; color: var(--green); display: flex; justify-content: space-between; }
+    .inning-box { background: var(--card); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 12px; overflow: hidden; }
+    .inning-head { background: #1e293b; padding: 9px 12px; font-weight: 700; font-size: 13px; color: var(--green); }
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th { background: rgba(15, 23, 42, 0.95); color: var(--blue); text-align: left; padding: 8px 8px; font-weight: 700; }
-    td { padding: 8px 8px; border-top: 1px solid rgba(255,255,255,0.06); vertical-align: middle; }
+    th { background: #0f172a; color: var(--blue); text-align: left; padding: 8px; }
+    td { padding: 8px; border-top: 1px solid rgba(255,255,255,0.06); }
     .num { text-align: right; font-weight: 700; }
     .player-link { color: var(--blue); font-weight: 700; cursor: pointer; text-decoration: underline; }
-    .dismissal { display: block; font-size: 11px; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
 
-    /* Squad & Structured Cricinfo Career Table */
-    .squad-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .player-card { background: var(--card-bg); padding: 10px; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    .player-card:active { border-color: var(--green); }
-    .p-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--blue); background: #0f172a; }
+    .squad-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .player-card { background: var(--card); padding: 9px; border-radius: 10px; border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .p-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 
-    .career-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(8px); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 12px; }
-    .career-box { background: var(--surface); width: 100%; max-width: 540px; border-radius: 18px; border: 1px solid var(--green); padding: 16px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-    .career-sec-title { font-size: 13px; font-weight: 700; color: var(--gold); margin: 14px 0 6px; display: flex; align-items: center; gap: 6px; }
-    .career-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); background: #090d16; }
-    .career-table th { background: #1e293b; color: var(--green); font-size: 11px; text-align: center; padding: 8px 6px; text-transform: uppercase; }
-    .career-table th:first-child { text-align: left; padding-left: 10px; color: var(--blue); }
-    .career-table td { font-size: 12px; text-align: center; padding: 7px 6px; color: #f8fafc; font-weight: 600; }
-    .career-table td:first-child { text-align: left; padding-left: 10px; font-weight: 700; color: var(--text-muted); }
+    /* Career Modal */
+    .career-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 12px; }
+    .career-box { background: var(--surface); width: 100%; max-width: 520px; border-radius: 16px; border: 1px solid var(--green); padding: 16px; max-height: 88vh; overflow-y: auto; }
+    .career-table th { background: #1e293b; color: var(--green); text-align: center; font-size: 11px; }
+    .career-table th:first-child, .career-table td:first-child { text-align: left; }
+    .career-table td { text-align: center; font-size: 12px; }
 
-    /* Video Player & 10-Sec Ad */
-    .player-wrapper { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 16px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(56, 189, 248, 0.35); }
+    /* TV & Videos */
+    .player-wrap { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 14px; overflow: hidden; margin-bottom: 10px; border: 1px solid var(--border); }
     video, iframe { width: 100%; height: 100%; border: none; }
-    #adOverlay { position: absolute; inset: 0; background: rgba(6, 9, 19, 0.96); display: none; flex-direction: column; justify-content: center; align-items: center; padding: 16px; text-align: center; z-index: 20; }
-    .ad-box-demo { width: 90%; max-width: 320px; height: 110px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px dashed var(--green); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 12px; }
-    .countdown-pill { background: rgba(0, 230, 118, 0.15); border: 1px solid var(--green); color: var(--green); padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; }
-
-    /* Channel Grid Cards */
+    #adOverlay { position: absolute; inset: 0; background: rgba(6,9,19,0.96); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20; text-align: center; padding: 12px; }
+    .ad-demo { width: 90%; max-width: 300px; height: 100px; background: #1e293b; border: 1px dashed var(--green); border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 10px; }
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .tv-card {
-      background: linear-gradient(145deg, #162038, #0f1626);
-      border-radius: 14px;
-      padding: 13px;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .tv-card:active { border-color: var(--green); }
-    .tv-icon-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--blue);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 16px;
-      margin-bottom: 8px;
-    }
-
-    .search-box { width: 100%; padding: 12px 16px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); color: #fff; font-size: 14px; margin-bottom: 12px; outline: none; }
-    .yt-card { display: flex; gap: 12px; background: var(--card-bg); padding: 10px; border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
-    .yt-thumb { width: 120px; height: 70px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
-
-    .bottom-ad-banner { position: fixed; bottom: 0; left: 0; right: 0; height: 58px; background: rgba(11, 17, 32, 0.95); backdrop-filter: blur(8px); border-top: 1px solid var(--border); display: flex; justify-content: center; align-items: center; z-index: 999; font-size: 12px; color: var(--text-muted); }
+    .tv-card { background: var(--card); border-radius: 12px; padding: 12px; border: 1px solid var(--border); cursor: pointer; }
+    .search-box { width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: #fff; font-size: 14px; margin-bottom: 12px; }
+    .yt-card { display: flex; gap: 10px; background: var(--card); padding: 10px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
+    .yt-thumb { width: 115px; height: 68px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .bottom-ad { position: fixed; bottom: 0; left: 0; right: 0; height: 54px; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: center; align-items: center; z-index: 999; font-size: 12px; color: var(--muted); }
   </style>
 </head>
 <body>
 
-  <!-- FIRST-TIME LANGUAGE SELECTION POPUP -->
-  <div class="lang-modal" id="langModal">
-    <div class="lang-box">
-      <div style="font-size:36px; margin-bottom:8px;">🏆</div>
-      <h2 style="font-size:20px; color:#fff;">Welcome to SportZone Pro</h2>
-      <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Select your preferred language • ভাষা নির্বাচন করুন</p>
-      <button class="lang-option" onclick="selectLanguage('en')"><span>🇺🇸 English</span><span style="color:var(--green);">➔</span></button>
-      <button class="lang-option" onclick="selectLanguage('bn')"><span>🇧🇩 বাংলা (Bangla)</span><span style="color:var(--green);">➔</span></button>
-      <button class="lang-option" onclick="selectLanguage('hi')"><span>🇮🇳 हिन्दी (Hindi)</span><span style="color:var(--green);">➔</span></button>
+  <!-- Language Selection Popup -->
+  <div class="overlay-modal" id="langModal">
+    <div class="modal-card">
+      <div style="font-size:32px; margin-bottom:6px;">🏆</div>
+      <h2 style="font-size:19px;">Welcome to SportZone Pro</h2>
+      <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Select Language • ভাষা নির্বাচন করুন</p>
+      <button class="lang-btn" onclick="selectLang('en')"><span>🇺🇸 English</span><span>➔</span></button>
+      <button class="lang-btn" onclick="selectLang('bn')"><span>🇧🇩 বাংলা (Bangla)</span><span>➔</span></button>
+      <button class="lang-btn" onclick="selectLang('hi')"><span>🇮🇳 हिन्दी (Hindi)</span><span>➔</span></button>
+    </div>
+  </div>
+
+  <!-- Future APK Update Popup -->
+  <div class="overlay-modal" id="updateModal">
+    <div class="modal-card">
+      <div style="font-size:32px; margin-bottom:6px;">🚀</div>
+      <h3 style="font-size:18px; color:var(--green); margin-bottom:6px;">New App Update Available!</h3>
+      <p id="updateMsg" style="font-size:13px; color:var(--muted); margin-bottom:14px;"></p>
+      <a id="updateLink" href="#" target="_blank" style="display:block; background:var(--green); color:#000; padding:11px; border-radius:10px; font-weight:700; text-decoration:none; margin-bottom:8px;">⬇ Download Update Now</a>
+      <button onclick="document.getElementById('updateModal').style.display='none'" style="background:none; border:none; color:var(--muted); font-size:12px; cursor:pointer;">Later</button>
     </div>
   </div>
 
   <header>
-    <div class="brand">
-      <div class="brand-icon">⚡</div>
-      <div class="brand-title">SportZone Pro</div>
-    </div>
-    <button class="lang-switch-btn" onclick="openLangModal()">🌐 <span id="currentLangLabel">EN</span></button>
+    <div class="brand">⚡ SportZone Pro</div>
+    <button class="lang-switch" onclick="document.getElementById('langModal').style.display='flex'">🌐 <span id="langLbl">EN</span></button>
   </header>
 
   <div class="main-nav">
-    <button class="nav-btn active" id="navMatches" onclick="switchMainTab('matchesTab', this)">🏏 Matches</button>
-    <button class="nav-btn" id="navLiveTv" onclick="switchMainTab('livetvTab', this)">📺 Live TV</button>
-    <button class="nav-btn" id="navVideos" onclick="switchMainTab('highlightsTab', this)">🎬 Videos</button>
+    <button class="nav-btn active" id="navM" onclick="switchTab('matchesTab', this)">🏏 Matches</button>
+    <button class="nav-btn" id="navT" onclick="switchTab('livetvTab', this)">📺 Live TV</button>
+    <button class="nav-btn" id="navV" onclick="switchTab('videosTab', this)">🎬 Videos</button>
   </div>
 
   <div class="container">
-    <!-- TAB 1: CRICINFO STYLE MATCH CENTER + AUTO LIVE COUNTDOWN -->
+    <!-- MATCHES -->
     <div id="matchesTab" class="section active">
-      <div class="live-stream-spotlight">
-        <div class="spotlight-header">
-          <span class="live-pulse-tag">● AUTO LIVE STREAM</span>
-          <span style="font-size:11px; color:#cbd5e1;">Live & Countdown</span>
-        </div>
-        <div id="autoLiveMatchEvents"></div>
+      <div class="spotlight">
+        <span class="live-tag">● AUTO LIVE STREAM & COUNTDOWN</span>
+        <div id="liveSpotlightList"></div>
       </div>
 
-      <div class="sec-head"><span id="lblFeatured">🔥 Featured Match Center</span></div>
-      <div class="featured-strip" id="featuredStrip"></div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:8px;" id="lblFeat">🔥 Featured Match Center</div>
+      <div class="strip" id="featuredStrip"></div>
 
-      <div class="filter-row">
-        <button class="pill active" id="fltAll" onclick="filterMatches('all', this)">All Matches</button>
-        <button class="pill" id="fltLive" onclick="filterMatches('live', this)">🔴 Live</button>
-        <button class="pill" id="fltUp" onclick="filterMatches('upcoming', this)">🗓️ Upcoming</button>
-        <button class="pill" id="fltRes" onclick="filterMatches('result', this)">✅ Results</button>
-        <button class="pill" id="fltRef" onclick="loadMatches(true)" style="color:var(--green);">↻ Refresh</button>
+      <div class="filters">
+        <button class="pill active" id="fAll" onclick="setFilter('all', this)">All</button>
+        <button class="pill" id="fLive" onclick="setFilter('live', this)">🔴 Live</button>
+        <button class="pill" id="fUp" onclick="setFilter('upcoming', this)">🗓️ Upcoming</button>
+        <button class="pill" id="fRes" onclick="setFilter('result', this)">✅ Results</button>
+        <button class="pill" onclick="loadMatches(true)" style="color:var(--green);">↻ Refresh</button>
       </div>
 
       <div id="matchList">Loading matches...</div>
     </div>
 
-    <!-- TAB 2: LIVE TV & 10-SEC PRE-ROLL AD -->
+    <!-- LIVE TV -->
     <div id="livetvTab" class="section">
-      <div class="player-wrapper">
+      <div class="player-wrap">
         <div id="adOverlay">
-          <div class="ad-box-demo">
-            <strong style="color:#00e676; font-size:14px;">SPONSORED AD (300x100)</strong>
-            <span style="font-size:11px; color:#94a3b8; margin-top:4px;">Your Ad Network Banner Here</span>
+          <div class="ad-demo" id="preRollAdSlot">
+            <strong style="color:var(--green); font-size:13px;">SPONSORED AD (300x100)</strong>
+            <span style="font-size:11px; color:var(--muted);">Your Ad Network Banner Here</span>
           </div>
-          <div class="countdown-pill"><span id="lblAdWait">Video starts in:</span> <span id="timerCount">10</span>s...</div>
+          <div style="color:var(--green); font-size:13px; font-weight:700;"><span id="lblWait">Video starts in</span> <span id="timerSec">10</span>s...</div>
         </div>
         <video id="hlsPlayer" controls playsinline></video>
       </div>
-      <div id="nowPlayingText" style="background:var(--surface); padding:10px 14px; border-radius:12px; font-size:13px; color:var(--green); margin-bottom:16px; border:1px solid var(--border); font-weight:600;">📡 Select any channel below (Plays after 10s ad)</div>
+      <div id="nowPlaying" style="background:var(--surface); padding:9px 12px; border-radius:10px; font-size:13px; color:var(--green); margin-bottom:14px; border:1px solid var(--border);">📡 Select any channel below</div>
 
-      <div class="sec-head"><span id="lblFastTv">⭐ Featured Fast Sports Channels</span></div>
-      <div class="grid" id="featuredTvGrid"></div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:8px;" id="lblFast">⭐ Featured Fast Channels</div>
+      <div class="grid" id="fastTvGrid"></div>
 
-      <div class="sec-head" style="margin-top:22px;">
-        <span id="lblAutoTv">🌍 Auto-Loaded Free Sports Channels</span>
-        <span id="autoCountBadge" style="font-size:12px; color:var(--green);">Loading...</span>
+      <div style="font-size:14px; font-weight:700; margin:18px 0 8px; display:flex; justify-content:space-between;">
+        <span id="lblAuto">🌍 Auto-Loaded Sports Channels</span>
+        <span id="autoBadge" style="font-size:12px; color:var(--green);">Loading...</span>
       </div>
-      <input type="text" id="channelSearch" class="search-box" placeholder="🔍 Search channel (Cricket, Football, Racing)..." onkeyup="filterAutoChannels()">
-      <div class="grid" id="autoChannelGrid"></div>
+      <input type="text" id="tvSearch" class="search-box" placeholder="🔍 Search channel..." onkeyup="filterTv()">
+      <div class="grid" id="autoTvGrid"></div>
     </div>
 
-    <!-- TAB 3: AUTO HIGHLIGHTS -->
-    <div id="highlightsTab" class="section">
-      <div class="player-wrapper"><iframe id="ytPlayer" src="" allowfullscreen></iframe></div>
-      <div class="sec-head"><span id="lblVideos">⚡ Official Highlights & Live Streams</span></div>
+    <!-- VIDEOS -->
+    <div id="videosTab" class="section">
+      <div class="player-wrap"><iframe id="ytPlayer" src="" allowfullscreen></iframe></div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:8px;" id="lblVid">⚡ Official Highlights & Live</div>
       <div id="ytList">Loading videos...</div>
     </div>
   </div>
 
-  <!-- FULL MATCH DETAIL VIEW (4 CRICINFO TABS) -->
-  <div class="full-modal" id="matchDetailModal">
-    <div class="modal-header">
-      <button class="back-btn" id="btnBack" onclick="closeMatchDetail()">← Back</button>
-      <div id="detailHeaderTitle" style="font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Match Details</div>
+  <!-- MATCH DETAIL MODAL -->
+  <div class="full-modal" id="detailModal">
+    <div class="modal-head">
+      <button class="back-btn" id="btnBack" onclick="document.getElementById('detailModal').style.display='none'">← Back</button>
+      <div id="detailTitle" style="font-size:14px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Match</div>
     </div>
-
     <div class="sub-tabs">
-      <div class="sub-tab active" id="tabSummary" onclick="switchSubTab('summaryPane', this)">⚡ Live / Summary</div>
-      <div class="sub-tab" id="tabScorecard" onclick="switchSubTab('scorecardPane', this)">📊 Scorecard</div>
-      <div class="sub-tab" id="tabSquads" onclick="switchSubTab('squadsPane', this)">👥 Playing XI</div>
-      <div class="sub-tab" id="tabInfo" onclick="switchSubTab('infoPane', this)">🏟️ Venue & Info</div>
+      <div class="sub-tab active" id="tSum" onclick="switchSub('pSum', this)">⚡ Summary</div>
+      <div class="sub-tab" id="tSc" onclick="switchSub('pSc', this)">📊 Scorecard</div>
+      <div class="sub-tab" id="tSq" onclick="switchSub('pSq', this)">👥 Squads</div>
+      <div class="sub-tab" id="tIn" onclick="switchSub('pIn', this)">🏟️ Stadium</div>
     </div>
-
     <div class="modal-body">
-      <div id="summaryPane" class="sub-pane">Loading...</div>
-      <div id="scorecardPane" class="sub-pane" style="display:none;">Loading...</div>
-      <div id="squadsPane" class="sub-pane" style="display:none;">Loading...</div>
-      <div id="infoPane" class="sub-pane" style="display:none;">Loading...</div>
+      <div id="pSum" class="sub-pane"></div>
+      <div id="pSc" class="sub-pane" style="display:none;"></div>
+      <div id="pSq" class="sub-pane" style="display:none;"></div>
+      <div id="pIn" class="sub-pane" style="display:none;"></div>
     </div>
   </div>
 
-  <!-- STRUCTURED CRICINFO PLAYER CAREER HISTORY MODAL -->
-  <div class="career-overlay" id="playerCareerModal" onclick="if(event.target.id==='playerCareerModal') this.style.display='none'">
+  <!-- PLAYER CAREER MODAL -->
+  <div class="career-overlay" id="careerModal" onclick="if(event.target.id==='careerModal') this.style.display='none'">
     <div class="career-box">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <span id="lblPlayerCareer" style="font-size:14px; color:var(--green); font-weight:700;">👤 Player Career Profile</span>
-        <button onclick="document.getElementById('playerCareerModal').style.display='none'" style="background:#1e293b; color:#fff; border:none; padding:5px 12px; border-radius:8px; cursor:pointer; font-weight:700;">✕</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span style="font-size:14px; color:var(--green); font-weight:700;">👤 Player Career Profile</span>
+        <button onclick="document.getElementById('careerModal').style.display='none'" style="background:#1e293b; color:#fff; border:none; padding:4px 10px; border-radius:6px; cursor:pointer;">✕</button>
       </div>
-      <div id="playerCareerContent">Loading...</div>
+      <div id="careerBody"></div>
     </div>
   </div>
 
-  <div class="bottom-ad-banner">
-    <span>[ Banner Ad Space: 320x50 ]</span>
-  </div>
+  <div class="bottom-ad" id="bottomBannerAd"><span>[ Banner Ad Space: 320x50 ]</span></div>
 
   <script>
-    // =========================================================
-    // MULTI-LANGUAGE DICTIONARY (English, Bangla, Hindi)
-    // =========================================================
-    const i18n = {
-      en: {
-        code: "EN",
-        navMatches: "🏏 Matches", navLiveTv: "📺 Live TV", navVideos: "🎬 Videos",
-        lblFeatured: "🔥 Featured Match Center",
-        fltAll: "All Matches", fltLive: "🔴 Live", fltUp: "🗓️ Upcoming", fltRes: "✅ Results", fltRef: "↻ Refresh",
-        scorecardLink: "Match Center ➔", noMatches: "No matches available in this category.",
-        lblAdWait: "Video starts in:", nowPlayingDefault: "📡 Select any channel below (Plays after 10s ad)",
-        nowPlayingLoading: "⏳ Loading:", nowPlayingLive: "▶️ Now Playing:",
-        lblFastTv: "⭐ Featured Fast Sports Channels", lblAutoTv: "🌍 Auto-Loaded Free Sports Channels",
-        searchPlaceholder: "🔍 Search channel (Cricket, Football, Racing)...",
-        lblVideos: "⚡ Official Highlights & Live Streams",
-        btnBack: "← Back", tabSummary: "⚡ Summary", tabScorecard: "📊 Scorecard", tabSquads: "👥 Squads", tabInfo: "🏟️ Stadium",
-        batsmanCol: "Batsman (Tap for Career)", bowlerCol: "Bowler",
-        squadTitle: "Squad (Tap player for career table)", lblPlayerCareer: "👤 Player Career Profile",
-        venueTitle: "🏟️ Stadium & Match Info", matchLbl: "Match", venueLbl: "Venue / Stadium", formatLbl: "Format", dateLbl: "Date", statusLbl: "Match Status", tossLbl: "Toss",
-        battingLbl: "Batting:", bowlingLbl: "Bowling:",
-        batSummaryTitle: "🏏 Batting Career Summary", bowlSummaryTitle: "🎯 Bowling Career Summary",
-        watchLiveBtn: "🔴 Watch Live", startsInLbl: "Starts in"
-      },
-      bn: {
-        code: "বাংলা",
-        navMatches: "🏏 ম্যাচসমূহ", navLiveTv: "📺 লাইভ টিভি", navVideos: "🎬 ভিডিও",
-        lblFeatured: "🔥 ফিচার্ড ম্যাচ সেন্টার",
-        fltAll: "সব ম্যাচ", fltLive: "🔴 লাইভ", fltUp: "🗓️ আসন্ন", fltRes: "✅ ফলাফল", fltRef: "↻ রিফ্রেশ",
-        scorecardLink: "ম্যাচ সেন্টার ➔", noMatches: "এই ক্যাটাগরিতে এখন কোনো ম্যাচ নেই।",
-        lblAdWait: "ভিডিও শুরু হতে বাকি:", nowPlayingDefault: "📡 নিচের যেকোনো চ্যানেলে ক্লিক করুন (১০ সেকেন্ড পর চলবে)",
-        nowPlayingLoading: "⏳ লোড হচ্ছে:", nowPlayingLive: "▶️ এখন চলছে:",
-        lblFastTv: "⭐ বাছাইকৃত সেরা ফাস্ট স্পোর্টস চ্যানেল", lblAutoTv: "🌍 অটো-লোডেড সব ফ্রি স্পোর্টস চ্যানেল",
-        searchPlaceholder: "🔍 চ্যানেলের নাম লিখে খুঁজুন (Cricket, Football, Racing)...",
-        lblVideos: "⚡ অফিসিয়াল হাইলাইটস ও লাইভ ভিডিও",
-        btnBack: "← ফিরে যান", tabSummary: "⚡ সামারি", tabScorecard: "📊 স্কোরকার্ড", tabSquads: "👥 স্কোয়াড", tabInfo: "🏟️ স্টেডিয়াম",
-        batsmanCol: "ব্যাটসম্যান (ক্লিক করে রেকর্ড দেখুন)", bowlerCol: "বোলার",
-        squadTitle: "স্কোয়াড (ক্যারিয়ার ছক দেখতে প্লেয়ারে ক্লিক করুন)", lblPlayerCareer: "👤 প্লেয়ার ক্যারিয়ার প্রোফাইল",
-        venueTitle: "🏟️ স্টেডিয়াম ও ম্যাচের বিস্তারিত", matchLbl: "ম্যাচ", venueLbl: "ভেন্যু / স্টেডিয়াম", formatLbl: "ফরম্যাট", dateLbl: "তারিখ", statusLbl: "বর্তমান অবস্থা", tossLbl: "টস রিপোর্ট",
-        battingLbl: "ব্যাটিং:", bowlingLbl: "বোলিং:",
-        batSummaryTitle: "🏏 ব্যাটিং ক্যারিয়ার রেকর্ড (ছক)", bowlSummaryTitle: "🎯 বোলিং ক্যারিয়ার রেকর্ড (ছক)",
-        watchLiveBtn: "🔴 লাইভ দেখুন", startsInLbl: "শুরু হতে বাকি"
-      },
-      hi: {
-        code: "हिन्दी",
-        navMatches: "🏏 मैच", navLiveTv: "📺 लाइव टीवी", navVideos: "🎬 वीडियो",
-        lblFeatured: "🔥 प्रमुख मैच सेंटर",
-        fltAll: "सभी मैच", fltLive: "🔴 लाइव", fltUp: "🗓️ आगामी", fltRes: "✅ परिणाम", fltRef: "↻ रिफ्रेश",
-        scorecardLink: "मैच सेंटर ➔", noMatches: "इस श्रेणी में अभी कोई मैच नहीं है।",
-        lblAdWait: "वीडियो शुरू होने में:", nowPlayingDefault: "📡 नीचे कोई भी चैनल चुनें (10 सेकंड विज्ञापन के बाद चलेगा)",
-        nowPlayingLoading: "⏳ लोड हो रहा है:", nowPlayingLive: "▶️ अभी चल रहा है:",
-        lblFastTv: "⭐ चुनिंदा तेज़ स्पोर्ट्स चैनल", lblAutoTv: "🌍 ऑटो-लोडेड फ्री स्पोर्ट्स चैनल",
-        searchPlaceholder: "🔍 चैनल खोजें (Cricket, Football, Racing)...",
-        lblVideos: "⚡ आधिकारिक हाइलाइट्स और लाइव",
-        btnBack: "← वापस जाएं", tabSummary: "⚡ समरी", tabScorecard: "📊 स्कोरकार्ड", tabSquads: "👥 स्क्वाड", tabInfo: "🏟️ स्टेडियम",
-        batsmanCol: "बल्लेबाज़ (रिकॉर्ड के लिए क्लिक करें)", bowlerCol: "गेंदबाज़",
-        squadTitle: "स्क्वाड (रिकॉर्ड देखने के लिए खिलाड़ी पर क्लिक करें)", lblPlayerCareer: "👤 खिलाड़ी करियर प्रोफ़ाइल",
-        venueTitle: "🏟️ स्टेडियम और मैच की जानकारी", matchLbl: "मैच", venueLbl: "स्टेडियम", formatLbl: "फ़ॉर्मेट", dateLbl: "तारीख", statusLbl: "स्थिति", tossLbl: "टॉस",
-        battingLbl: "बल्लेबाज़ी:", bowlingLbl: "गेंदबाज़ी:",
-        batSummaryTitle: "🏏 बल्लेबाज़ी करियर रिकॉर्ड", bowlSummaryTitle: "🎯 गेंदबाज़ी करियर रिकॉर्ड",
-        watchLiveBtn: "🔴 लाइव देखें", startsInLbl: "शुरू होने में"
-      }
+    const CONFIG = {
+      API_KEY: "25d6a156-f7a3-4f24-8985-6a08f1e96202",
+      SHOW_UPDATE_POPUP: false,
+      UPDATE_URL: "https://github.com/shafayatmuttaki/sportzone-live",
+      UPDATE_TEXT: "New version 2.0 is available!",
+      YT_CHANNEL: "UCt2jxGk2fw704_7yX20r-2w"
     };
 
-    let currentLang = localStorage.getItem('sportzone_lang') || '';
-
-    function applyLanguage(lang) {
-      currentLang = lang;
-      localStorage.setItem('sportzone_lang', lang);
-      const t = i18n[lang] || i18n.en;
-
-      document.getElementById('currentLangLabel').innerText = t.code;
-      document.getElementById('navMatches').innerText = t.navMatches;
-      document.getElementById('navLiveTv').innerText = t.navLiveTv;
-      document.getElementById('navVideos').innerText = t.navVideos;
-      document.getElementById('lblFeatured').innerText = t.lblFeatured;
-      document.getElementById('fltAll').innerText = t.fltAll;
-      document.getElementById('fltLive').innerText = t.fltLive;
-      document.getElementById('fltUp').innerText = t.fltUp;
-      document.getElementById('fltRes').innerText = t.fltRes;
-      document.getElementById('fltRef').innerText = t.fltRef;
-      document.getElementById('lblAdWait').innerText = t.lblAdWait;
-      document.getElementById('nowPlayingText').innerText = t.nowPlayingDefault;
-      document.getElementById('lblFastTv').innerText = t.lblFastTv;
-      document.getElementById('lblAutoTv').innerText = t.lblAutoTv;
-      document.getElementById('channelSearch').placeholder = t.searchPlaceholder;
-      document.getElementById('lblVideos').innerText = t.lblVideos;
-      document.getElementById('btnBack').innerText = t.btnBack;
-      document.getElementById('tabSummary').innerText = t.tabSummary;
-      document.getElementById('tabScorecard').innerText = t.tabScorecard;
-      document.getElementById('tabSquads').innerText = t.tabSquads;
-      document.getElementById('tabInfo').innerText = t.tabInfo;
-      document.getElementById('lblPlayerCareer').innerText = t.lblPlayerCareer;
-
-      if (allMatches.length > 0) {
-        renderMatchList();
-        renderAutoLiveStreamSpotlight();
-      }
+    if (CONFIG.SHOW_UPDATE_POPUP) {
+      document.getElementById('updateMsg').innerText = CONFIG.UPDATE_TEXT;
+      document.getElementById('updateLink').href = CONFIG.UPDATE_URL;
+      document.getElementById('updateModal').style.display = 'flex';
     }
 
-    function selectLanguage(lang) {
-      document.getElementById('langModal').style.display = 'none';
-      applyLanguage(lang);
+    const i18n = {
+      en: { code:"EN", navM:"🏏 Matches", navT:"📺 Live TV", navV:"🎬 Videos", lblFeat:"🔥 Featured Match Center", fAll:"All", fLive:"🔴 Live", fUp:"🗓️ Upcoming", fRes:"✅ Results", lblFast:"⭐ Featured Fast Channels", lblAuto:"🌍 Auto-Loaded Sports Channels", lblVid:"⚡ Official Highlights & Live", btnBack:"← Back", tSum:"⚡ Summary", tSc:"📊 Scorecard", tSq:"👥 Squads", tIn:"🏟️ Stadium", watch:"🔴 Watch Live", starts:"Starts in" },
+      bn: { code:"বাংলা", navM:"🏏 ম্যাচসমূহ", navT:"📺 লাইভ টিভি", navV:"🎬 ভিডিও", lblFeat:"🔥 ফিচার্ড ম্যাচ সেন্টার", fAll:"সব ম্যাচ", fLive:"🔴 লাইভ", fUp:"🗓️ আসন্ন", fRes:"✅ ফলাফল", lblFast:"⭐ বাছাইকৃত সেরা ফাস্ট চ্যানেল", lblAuto:"🌍 অটো-লোডেড সব স্পোর্টস চ্যানেল", lblVid:"⚡ অফিসিয়াল হাইলাইটস ও লাইভ", btnBack:"← ফিরে যান", tSum:"⚡ সামারি", tSc:"📊 স্কোরকার্ড", tSq:"👥 স্কোয়াড", tIn:"🏟️ স্টেডিয়াম", watch:"🔴 লাইভ দেখুন", starts:"শুরু হতে বাকি" },
+      hi: { code:"हिन्दी", navM:"🏏 मैच", navT:"📺 लाइव टीवी", navV:"🎬 वीडियो", lblFeat:"🔥 प्रमुख मैच सेंटर", fAll:"सभी मैच", fLive:"🔴 लाइव", fUp:"🗓️ आगामी", fRes:"✅ परिणाम", lblFast:"⭐ चुनिंदा तेज़ चैनल", lblAuto:"🌍 ऑटो-लोडेड स्पोर्ट्स चैनल", lblVid:"⚡ आधिकारिक हाइलाइट्स", btnBack:"← वापस", tSum:"⚡ समरी", tSc:"📊 स्कोरकार्ड", tSq:"👥 स्क्वाड", tIn:"🏟️ स्टेडियम", watch:"🔴 लाइव देखें", starts:"शुरू होने में" }
+    };
+
+    let lang = localStorage.getItem('sz_lang') || '';
+    function applyLang(l) {
+      lang = l; localStorage.setItem('sz_lang', l);
+      const t = i18n[l] || i18n.en;
+      document.getElementById('langLbl').innerText = t.code;
+      ['navM','navT','navV','lblFeat','fAll','fLive','fUp','fRes','lblFast','lblAuto','lblVid','btnBack','tSum','tSc','tSq','tIn'].forEach(id => {
+        if (document.getElementById(id)) document.getElementById(id).innerText = t[id];
+      });
+      if (matches.length) { renderMatches(); renderSpotlight(); }
     }
+    function selectLang(l) { document.getElementById('langModal').style.display = 'none'; applyLang(l); }
+    if (!lang) { document.getElementById('langModal').style.display = 'flex'; applyLang('en'); } else { applyLang(lang); }
 
-    function openLangModal() {
-      document.getElementById('langModal').style.display = 'flex';
-    }
-
-    if (!currentLang) {
-      document.getElementById('langModal').style.display = 'flex';
-      applyLanguage('en');
-    } else {
-      applyLanguage(currentLang);
-    }
-
-    // =========================================================
-    // CRICAPI LIVE SCORES, AUTO LIVE COUNTDOWN & SCORECARD
-    // =========================================================
-    const API_KEY = "25d6a156-f7a3-4f24-8985-6a08f1e96202";
-    let allMatches = [];
-    let currentFilter = 'all';
-    const cache = {};
-    let countdownTimers = [];
-
-    async function fetchWithCache(url, force = false) {
-      if (!force && cache[url]) return cache[url];
-      const res = await fetch(url);
-      const data = await res.json();
-      if (data.status === "success") cache[url] = data;
-      return data;
+    let matches = [], filterType = 'all', apiCache = {}, timers = [];
+    async function getJson(url, force = false) {
+      if (!force && apiCache[url]) return apiCache[url];
+      const r = await fetch(url);
+      const d = await r.json();
+      if (d.status === 'success') apiCache[url] = d;
+      return d;
     }
 
     async function loadMatches(force = false) {
-      const listEl = document.getElementById('matchList');
-      const stripEl = document.getElementById('featuredStrip');
+      let data = null;
       try {
-        const json = await fetchWithCache(`https://api.cricapi.com/v1/currentMatches?apikey=${API_KEY}&offset=0`, force);
-        if (json.status === "success" && json.data) {
-          allMatches = json.data;
-          renderAutoLiveStreamSpotlight();
-
-          stripEl.innerHTML = "";
-          allMatches.slice(0, 6).forEach(m => {
-            const div = document.createElement('div');
-            div.className = 'mini-card';
-            div.innerHTML = `
-              <div style="font-size:10px; color:var(--green); font-weight:700; margin-bottom:4px;">${m.matchType ? m.matchType.toUpperCase() : 'MATCH'} • ${m.matchStarted && !m.matchEnded ? '🔴 LIVE' : (m.matchEnded ? 'RESULT' : 'UPCOMING')}</div>
-              <div style="font-size:13px; font-weight:700; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</div>
-              <div style="font-size:11px; color:var(--gold); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.status}</div>
-            `;
-            div.onclick = () => openFullMatchCenter(m);
-            stripEl.appendChild(div);
-          });
-          renderMatchList();
-        } else {
-          listEl.innerHTML = `<p style="color:#94a3b8; font-size:13px;">API Limit / No Data (${json.reason || ''})</p>`;
+        const cRes = await fetch(`./scores.json?t=${Date.now()}`);
+        if (cRes.ok) {
+          const parsed = await cRes.json();
+          if (parsed && parsed.status === 'success' && parsed.data) data = parsed;
         }
-      } catch (e) {
-        listEl.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Network Error</p>`;
+      } catch (e) {}
+
+      if (!data) {
+        try {
+          data = await getJson(`https://api.cricapi.com/v1/currentMatches?apikey=${CONFIG.API_KEY}&offset=0`, force);
+        } catch (e) {}
+      }
+
+      if (data && data.status === 'success' && data.data) {
+        matches = data.data;
+        renderSpotlight();
+        const strip = document.getElementById('featuredStrip');
+        strip.innerHTML = '';
+        matches.slice(0, 6).forEach(m => {
+          const d = document.createElement('div');
+          d.className = 'mini-card';
+          d.innerHTML = `<div style="font-size:10px; color:var(--green); font-weight:700;">${(m.matchType||'MATCH').toUpperCase()} • ${m.matchStarted && !m.matchEnded ? '🔴 LIVE' : (m.matchEnded ? 'RESULT' : 'UPCOMING')}</div><div style="font-size:13px; font-weight:700; margin:4px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</div><div style="font-size:11px; color:var(--gold); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.status}</div>`;
+          d.onclick = () => openDetail(m);
+          strip.appendChild(d);
+        });
+        renderMatches();
+      } else {
+        document.getElementById('matchList').innerHTML = `<p style="color:var(--muted); font-size:13px;">No live data available right now. Tap Refresh.</p>`;
       }
     }
 
-    function renderAutoLiveStreamSpotlight() {
-      const t = i18n[currentLang] || i18n.en;
-      const box = document.getElementById('autoLiveMatchEvents');
-      countdownTimers.forEach(clearInterval);
-      countdownTimers = [];
-      box.innerHTML = "";
+    function renderSpotlight() {
+      const t = i18n[lang] || i18n.en;
+      const box = document.getElementById('liveSpotlightList');
+      timers.forEach(clearInterval); timers = []; box.innerHTML = '';
+      const live = matches.filter(m => m.matchStarted && !m.matchEnded).slice(0, 2);
+      const up = matches.filter(m => !m.matchStarted && m.dateTimeGMT).slice(0, 2);
 
-      const liveOnes = allMatches.filter(m => m.matchStarted && !m.matchEnded).slice(0, 2);
-      const upcomingOnes = allMatches.filter(m => !m.matchStarted && m.dateTimeGMT).slice(0, 2);
-
-      liveOnes.forEach(m => {
-        const row = document.createElement('div');
-        row.className = 'stream-event-card';
-        row.innerHTML = `
-          <div style="overflow:hidden;">
-            <div style="font-size:11px; color:var(--red); font-weight:700;">🔴 LIVE MATCH STREAM</div>
-            <div style="font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</div>
-          </div>
-          <button class="watch-now-btn" onclick="jumpToLiveStream('${m.name.replace(/'/g, "")}')">${t.watchLiveBtn}</button>
-        `;
-        box.appendChild(row);
+      live.forEach(m => {
+        const r = document.createElement('div');
+        r.className = 'stream-row';
+        r.innerHTML = `<div style="overflow:hidden;"><div style="font-size:10px; color:var(--red); font-weight:700;">🔴 LIVE NOW</div><div style="font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</div></div><button class="watch-btn" onclick="goLive('${m.name.replace(/'/g,'')}')">${t.watch}</button>`;
+        box.appendChild(r);
       });
 
-      upcomingOnes.forEach((m, idx) => {
-        const row = document.createElement('div');
-        row.className = 'stream-event-card';
-        const timerId = `match_cd_${idx}`;
-        row.innerHTML = `
-          <div style="overflow:hidden;">
-            <div style="font-size:11px; color:var(--blue); font-weight:700;">⏳ ${t.startsInLbl}</div>
-            <div style="font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</div>
-          </div>
-          <div class="countdown-box" id="${timerId}">--:--:--</div>
-        `;
-        box.appendChild(row);
-
-        const targetTime = new Date(m.dateTimeGMT + "Z").getTime();
-        const interval = setInterval(() => {
-          const now = Date.now();
-          const diff = targetTime - now;
-          const el = document.getElementById(timerId);
-          if (!el) return clearInterval(interval);
-          if (diff <= 0) {
-            clearInterval(interval);
-            el.outerHTML = `<button class="watch-now-btn" onclick="jumpToLiveStream('${m.name.replace(/'/g, "")}')">${t.watchLiveBtn}</button>`;
-          } else {
-            const hrs = Math.floor(diff / (1000 * 60 * 60));
-            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const secs = Math.floor((diff % (1000 * 60)) / 1000);
-            el.innerText = `${hrs}h ${mins}m ${secs}s`;
+      up.forEach((m, i) => {
+        const r = document.createElement('div');
+        r.className = 'stream-row';
+        const tid = 'cd_' + i;
+        r.innerHTML = `<div style="overflow:hidden;"><div style="font-size:10px; color:var(--blue); font-weight:700;">⏳ ${t.starts}</div><div style="font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</div></div><div class="cd-box" id="${tid}">--:--:--</div>`;
+        box.appendChild(r);
+        const target = new Date(m.dateTimeGMT + 'Z').getTime();
+        const iv = setInterval(() => {
+          const diff = target - Date.now();
+          const el = document.getElementById(tid);
+          if (!el) return clearInterval(iv);
+          if (diff <= 0) { clearInterval(iv); el.outerHTML = `<button class="watch-btn" onclick="goLive('${m.name.replace(/'/g,'')}')">${t.watch}</button>`; }
+          else {
+            const h = Math.floor(diff/3600000), mn = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+            el.innerText = `${h}h ${mn}m ${s}s`;
           }
         }, 1000);
-        countdownTimers.push(interval);
+        timers.push(iv);
       });
 
-      if (!liveOnes.length && !upcomingOnes.length) {
-        box.innerHTML = `<div class="stream-event-card">
-          <div style="font-size:13px; font-weight:700;">24/7 Live Sports & Cricket TV</div>
-          <button class="watch-now-btn" onclick="jumpToLiveStream('Live Sports TV')">${t.watchLiveBtn}</button>
-        </div>`;
+      if (!live.length && !up.length) {
+        box.innerHTML = `<div class="stream-row"><div style="font-size:13px; font-weight:700;">24/7 Live Sports & Cricket TV</div><button class="watch-btn" onclick="goLive('Live Sports')">${t.watch}</button></div>`;
       }
     }
 
-    function jumpToLiveStream(matchTitle) {
-      const tvBtn = document.getElementById('navLiveTv');
-      switchMainTab('livetvTab', tvBtn);
-      startChannelWithAd(featuredChannels[0].url, `${matchTitle} (Sports Stream)`);
+    function goLive(title) {
+      switchTab('livetvTab', document.getElementById('navT'));
+      playWithAd(fastChannels[0].url, title);
     }
 
-    function filterMatches(type, btn) {
-      currentFilter = type;
+    function setFilter(f, btn) {
+      filterType = f;
       document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
-      renderMatchList();
+      renderMatches();
     }
 
-    function renderMatchList() {
-      const t = i18n[currentLang] || i18n.en;
-      const listEl = document.getElementById('matchList');
-      listEl.innerHTML = "";
-      const filtered = allMatches.filter(m => {
-        if (currentFilter === 'all') return true;
-        if (currentFilter === 'live') return m.matchStarted && !m.matchEnded;
-        if (currentFilter === 'upcoming') return !m.matchStarted;
-        if (currentFilter === 'result') return m.matchEnded;
-        return true;
-      });
+    function renderMatches() {
+      const list = document.getElementById('matchList');
+      list.innerHTML = '';
+      const arr = matches.filter(m => filterType==='all' ? true : (filterType==='live' ? (m.matchStarted && !m.matchEnded) : (filterType==='upcoming' ? !m.matchStarted : m.matchEnded)));
+      if (!arr.length) { list.innerHTML = `<p style="text-align:center; color:var(--muted); padding:20px; font-size:13px;">No matches in this tab.</p>`; return; }
 
-      if (!filtered.length) {
-        listEl.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">${t.noMatches}</p>`;
-        return;
-      }
-
-      filtered.forEach(m => {
-        const isLive = m.matchStarted && !m.matchEnded;
-        const badge = isLive ? `<span class="badge b-live">● LIVE</span>` : (m.matchEnded ? `<span class="badge b-res">RESULT</span>` : `<span class="badge b-up">UPCOMING</span>`);
-        const t1 = m.teamInfo && m.teamInfo[0] ? m.teamInfo[0] : { name: m.teams[0] || 'Team 1', img: '' };
-        const t2 = m.teamInfo && m.teamInfo[1] ? m.teamInfo[1] : { name: m.teams[1] || 'Team 2', img: '' };
-
-        let s1 = "-", s2 = "-";
+      arr.forEach(m => {
+        const badge = (m.matchStarted && !m.matchEnded) ? `<span class="badge b-live">● LIVE</span>` : (m.matchEnded ? `<span class="badge b-res">RESULT</span>` : `<span class="badge b-up">UPCOMING</span>`);
+        const t1 = m.teamInfo && m.teamInfo[0] ? m.teamInfo[0] : { name: m.teams[0]||'Team 1', img:'' };
+        const t2 = m.teamInfo && m.teamInfo[1] ? m.teamInfo[1] : { name: m.teams[1]||'Team 2', img:'' };
+        let s1 = '-', s2 = '-';
         if (m.score && m.score.length) {
-          s1 = ""; s2 = "";
+          s1 = ''; s2 = '';
           m.score.forEach(sc => {
             if (sc.inning.toLowerCase().includes(t1.name.toLowerCase())) s1 += `${sc.r}/${sc.w} (${sc.o}) `;
             else s2 += `${sc.r}/${sc.w} (${sc.o}) `;
           });
         }
-
-        const card = document.createElement('div');
-        card.className = 'match-card';
-        card.innerHTML = `
-          <div class="m-top"><span>${m.matchType ? m.matchType.toUpperCase() : 'CRICKET'} • ${m.date}</span>${badge}</div>
-          <div class="t-row"><div class="t-left">${t1.img ? `<img class="t-img" src="${t1.img}">` : ''}<span>${t1.shortname || t1.name}</span></div><span>${s1 || '-'}</span></div>
-          <div class="t-row"><div class="t-left">${t2.img ? `<img class="t-img" src="${t2.img}">` : ''}<span>${t2.shortname || t2.name}</span></div><span>${s2 || '-'}</span></div>
-          <div class="m-status"><span>${m.status}</span><span style="color:var(--green); font-weight:700;">${t.scorecardLink}</span></div>
-        `;
-        card.onclick = () => openFullMatchCenter(m);
-        listEl.appendChild(card);
+        const c = document.createElement('div');
+        c.className = 'match-card';
+        c.innerHTML = `<div class="m-top"><span>${(m.matchType||'CRICKET').toUpperCase()} • ${m.date}</span>${badge}</div><div class="t-row"><div class="t-left">${t1.img?`<img class="t-img" src="${t1.img}">`:''}<span>${t1.shortname||t1.name}</span></div><span>${s1||'-'}</span></div><div class="t-row"><div class="t-left">${t2.img?`<img class="t-img" src="${t2.img}">`:''}<span>${t2.shortname||t2.name}</span></div><span>${s2||'-'}</span></div><div class="m-status"><span>${m.status}</span><span style="color:var(--green); font-weight:700;">Scorecard ➔</span></div>`;
+        c.onclick = () => openDetail(m);
+        list.appendChild(c);
       });
     }
 
-    // FULL MATCH CENTER (4 TABS: SUMMARY, SCORECARD, PLAYING XI, VENUE & INFO)
-    async function openFullMatchCenter(match) {
-      const t = i18n[currentLang] || i18n.en;
-      const modal = document.getElementById('matchDetailModal');
-      document.getElementById('detailHeaderTitle').innerText = match.name;
-      modal.style.display = 'flex';
+    async function openDetail(m) {
+      document.getElementById('detailTitle').innerText = m.name;
+      document.getElementById('detailModal').style.display = 'flex';
+      switchSub('pSum', document.getElementById('tSum'));
 
-      const sumPane = document.getElementById('summaryPane');
-      const scPane = document.getElementById('scorecardPane');
-      const sqPane = document.getElementById('squadsPane');
-      const inPane = document.getElementById('infoPane');
-
-      // Reset to Summary Tab
-      switchSubTab('summaryPane', document.getElementById('tabSummary'));
-
-      // Build Innings Breakdown for Summary
-      let inningsSummaryHtml = '';
-      if (match.score && match.score.length > 0) {
-        inningsSummaryHtml = match.score.map(sc => {
-          const crr = sc.o > 0 ? (sc.r / sc.o).toFixed(2) : '0.00';
-          return `
-            <div style="background:rgba(10,15,28,0.75); padding:12px; border-radius:12px; margin-top:10px; border:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <div style="font-size:12px; color:var(--text-muted);">${sc.inning}</div>
-                <div style="font-size:18px; font-weight:700; color:var(--green);">${sc.r}/${sc.w} <span style="font-size:13px; color:#fff;">(${sc.o} Ov)</span></div>
-              </div>
-              <div style="text-align:right;">
-                <span style="font-size:11px; color:var(--blue); background:rgba(56,189,248,0.15); padding:4px 8px; border-radius:6px; font-weight:700;">CRR: ${crr}</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-      } else {
-        inningsSummaryHtml = `<p style="font-size:13px; color:var(--text-muted); margin-top:10px;">Match innings score will update live once play starts.</p>`;
-      }
-
-      sumPane.innerHTML = `
-        <div class="summary-hero">
-          <div style="font-size:12px; color:var(--gold); font-weight:700; margin-bottom:6px;">${match.status}</div>
-          ${inningsSummaryHtml}
-          <div class="info-grid">
-            <div class="info-chip"><span>${t.formatLbl}</span><strong>${match.matchType ? match.matchType.toUpperCase() : 'CRICKET'}</strong></div>
-            <div class="info-chip"><span>${t.dateLbl}</span><strong>${match.date}</strong></div>
-            <div class="info-chip" style="grid-column: span 2;"><span>${t.venueLbl}</span><strong>${match.venue || 'N/A'}</strong></div>
-          </div>
-        </div>
-      `;
-
-      inPane.innerHTML = `
-        <div class="inning-box" style="padding:16px;">
-          <h3 style="font-size:15px; color:var(--green); margin-bottom:12px;">${t.venueTitle}</h3>
-          <div class="info-grid">
-            <div class="info-chip" style="grid-column: span 2;"><span>${t.matchLbl}</span><strong>${match.name}</strong></div>
-            <div class="info-chip" style="grid-column: span 2;"><span>${t.venueLbl}</span><strong>${match.venue || 'N/A'}</strong></div>
-            <div class="info-chip"><span>${t.formatLbl}</span><strong>${match.matchType ? match.matchType.toUpperCase() : 'N/A'}</strong></div>
-            <div class="info-chip"><span>${t.dateLbl}</span><strong>${match.date}</strong></div>
-            <div class="info-chip" style="grid-column: span 2;"><span>${t.statusLbl}</span><strong style="color:var(--gold);">${match.status}</strong></div>
-          </div>
-        </div>
-      `;
-
-      scPane.innerHTML = `<p style="color:var(--green); font-size:13px;">Loading full scorecard...</p>`;
-      sqPane.innerHTML = `<p style="color:var(--green); font-size:13px;">Loading squads...</p>`;
-
-      // Load Full Scorecard
-      try {
-        const scJson = await fetchWithCache(`https://api.cricapi.com/v1/match_scorecard?apikey=${API_KEY}&id=${match.id}`);
-        if (scJson.status === "success" && scJson.data && scJson.data.scorecard && scJson.data.scorecard.length > 0) {
-          if (scJson.data.tossWinner) {
-            sumPane.querySelector('.summary-hero').insertAdjacentHTML('beforeend', `
-              <div style="margin-top:10px; font-size:12px; color:var(--blue); background:rgba(56,189,248,0.1); padding:8px 12px; border-radius:8px;">
-                🪙 <strong>${t.tossLbl}:</strong> ${scJson.data.tossWinner} (${scJson.data.tossChoice})
-              </div>
-            `);
-          }
-
-          let html = `<div style="background:#1e293b; padding:10px 14px; border-radius:10px; font-size:13px; color:var(--green); margin-bottom:12px; font-weight:700;">${scJson.data.status}</div>`;
-          scJson.data.scorecard.forEach(inn => {
-            let batRows = (inn.batting || []).map(b => `
-              <tr>
-                <td>
-                  <span class="player-link" onclick="openPlayerCareer('${b.batsman.id}', '${b.batsman.name.replace(/'/g, "")}')">${b.batsman.name}</span>
-                  <span class="dismissal">${b['dismissal-text'] || 'not out'}</span>
-                </td>
-                <td class="num" style="color:#fff;">${b.r}</td>
-                <td class="num">${b.b}</td>
-                <td class="num">${b['4s']}</td>
-                <td class="num">${b['6s']}</td>
-                <td class="num">${b.sr}</td>
-              </tr>
-            `).join('');
-
-            let bowlRows = (inn.bowling || []).map(bw => `
-              <tr>
-                <td><span class="player-link" onclick="openPlayerCareer('${bw.bowler.id}', '${bw.bowler.name.replace(/'/g, "")}')">${bw.bowler.name}</span></td>
-                <td class="num">${bw.o}</td>
-                <td class="num">${bw.m}</td>
-                <td class="num">${bw.r}</td>
-                <td class="num" style="color:var(--green);">${bw.w}</td>
-                <td class="num">${bw.eco}</td>
-              </tr>
-            `).join('');
-
-            html += `
-              <div class="inning-box">
-                <div class="inning-head"><span>${inn.inning}</span></div>
-                <table>
-                  <thead><tr><th>${t.batsmanCol}</th><th class="num">R</th><th class="num">B</th><th class="num">4s</th><th class="num">6s</th><th class="num">SR</th></tr></thead>
-                  <tbody>${batRows}</tbody>
-                </table>
-                <table style="margin-top:6px;">
-                  <thead><tr><th>${t.bowlerCol}</th><th class="num">O</th><th class="num">M</th><th class="num">R</th><th class="num">W</th><th class="num">ECO</th></tr></thead>
-                  <tbody>${bowlRows}</tbody>
-                </table>
-              </div>
-            `;
-          });
-          scPane.innerHTML = html;
-        } else {
-          scPane.innerHTML = `<div class="inning-box" style="padding:14px;"><p style="font-size:13px; color:var(--text-muted);">${match.status}</p></div>`;
-        }
-      } catch (err) {}
-
-      // Load Squads
-      try {
-        const sqJson = await fetchWithCache(`https://api.cricapi.com/v1/match_squad?apikey=${API_KEY}&id=${match.id}`);
-        if (sqJson.status === "success" && sqJson.data && sqJson.data.length > 0) {
-          sqPane.innerHTML = sqJson.data.map(team => `
-            <div style="margin-bottom:16px;">
-              <h4 style="font-size:14px; color:var(--green); margin-bottom:8px;">🏏 ${team.teamName} — ${t.squadTitle}</h4>
-              <div class="squad-grid">
-                ${(team.players || []).map(p => `
-                  <div class="player-card" onclick="openPlayerCareer('${p.id}', '${p.name.replace(/'/g, "")}')">
-                    <img class="p-avatar" src="${p.playerImg || 'https://h.cricapi.com/img/icon512.png'}">
-                    <div>
-                      <div style="font-size:13px; font-weight:700; color:#fff;">${p.name}</div>
-                      <div style="font-size:11px; color:var(--text-muted);">${p.role || 'Player'}</div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          `).join('');
-        } else {
-          sqPane.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">Squad list not announced yet.</p>`;
-        }
-      } catch (err) {}
-    }
-
-    // =========================================================
-    // CRICINFO STRUCTURED GRID TABLE FOR PLAYER CAREER STATS
-    // =========================================================
-    async function openPlayerCareer(playerId, playerName) {
-      const t = i18n[currentLang] || i18n.en;
-      const modal = document.getElementById('playerCareerModal');
-      const box = document.getElementById('playerCareerContent');
-      modal.style.display = 'flex';
-      box.innerHTML = `<p style="color:var(--green); font-size:13px;">Loading ${playerName} career table...</p>`;
+      const innHtml = (m.score && m.score.length) ? m.score.map(sc => `<div style="background:#0a0f1c; padding:10px; border-radius:10px; margin-top:8px;"><div style="font-size:12px; color:var(--muted);">${sc.inning}</div><div style="font-size:17px; font-weight:700; color:var(--green);">${sc.r}/${sc.w} (${sc.o} Ov)</div></div>`).join('') : '<p style="font-size:13px; color:var(--muted); margin-top:8px;">Match not started yet.</p>';
+      document.getElementById('pSum').innerHTML = `<div class="inning-box" style="padding:14px;"><div style="color:var(--gold); font-weight:700; font-size:13px;">${m.status}</div>${innHtml}</div>`;
+      document.getElementById('pIn').innerHTML = `<div class="inning-box" style="padding:14px;"><p style="margin-bottom:8px;"><strong>Match:</strong> ${m.name}</p><p style="margin-bottom:8px;"><strong>Stadium:</strong> ${m.venue||'N/A'}</p><p style="margin-bottom:8px;"><strong>Format:</strong> ${(m.matchType||'N/A').toUpperCase()}</p><p><strong>Date:</strong> ${m.date}</p></div>`;
+      document.getElementById('pSc').innerHTML = '<p style="color:var(--green);">Loading scorecard...</p>';
+      document.getElementById('pSq').innerHTML = '<p style="color:var(--green);">Loading squads...</p>';
 
       try {
-        const res = await fetchWithCache(`https://api.cricapi.com/v1/players_info?apikey=${API_KEY}&id=${playerId}`);
-        if (res.status === "success" && res.data) {
-          const p = res.data;
-          const stats = p.stats || [];
+        const sc = await getJson(`https://api.cricapi.com/v1/match_scorecard?apikey=${CONFIG.API_KEY}&id=${m.id}`);
+        if (sc.status === 'success' && sc.data && sc.data.scorecard && sc.data.scorecard.length) {
+          document.getElementById('pSc').innerHTML = sc.data.scorecard.map(inn => `
+            <div class="inning-box">
+              <div class="inning-head">${inn.inning}</div>
+              <table><thead><tr><th>Batsman</th><th class="num">R</th><th class="num">B</th><th class="num">4s</th><th class="num">6s</th><th class="num">SR</th></tr></thead>
+              <tbody>${(inn.batting||[]).map(b=>`<tr><td><span class="player-link" onclick="openPlayer('${b.batsman.id}','${b.batsman.name.replace(/'/g,'')}')">${b.batsman.name}</span><div style="font-size:10px;color:var(--muted);">${b['dismissal-text']||'not out'}</div></td><td class="num">${b.r}</td><td class="num">${b.b}</td><td class="num">${b['4s']}</td><td class="num">${b['6s']}</td><td class="num">${b.sr}</td></tr>`).join('')}</tbody></table>
+              <table style="margin-top:6px;"><thead><tr><th>Bowler</th><th class="num">O</th><th class="num">M</th><th class="num">R</th><th class="num">W</th><th class="num">ECO</th></tr></thead>
+              <tbody>${(inn.bowling||[]).map(bw=>`<tr><td><span class="player-link" onclick="openPlayer('${bw.bowler.id}','${bw.bowler.name.replace(/'/g,'')}')">${bw.bowler.name}</span></td><td class="num">${bw.o}</td><td class="num">${bw.m}</td><td class="num">${bw.r}</td><td class="num" style="color:var(--green);">${bw.w}</td><td class="num">${bw.eco}</td></tr>`).join('')}</tbody></table>
+            </div>`).join('');
+        } else { document.getElementById('pSc').innerHTML = `<div class="inning-box" style="padding:14px;">${m.status}</div>`; }
+      } catch (e) {}
 
-          // Helper to extract exact stat value by fn (batting/bowling), matchtype (test/odi/t20i/ipl), and stat key
-          const getStat = (fn, fmt, statKey) => {
-            const found = stats.find(s => s.fn === fn && s.matchtype === fmt && s.stat === statKey);
-            return found && found.value ? found.value : '-';
-          };
-
-          const formats = ['test', 'odi', 't20i', 'ipl'];
-          const batMetrics = [
-            { label: 'Matches', key: 'm' },
-            { label: 'Innings', key: 'inn' },
-            { label: 'Runs', key: 'runs' },
-            { label: 'Highest (HS)', key: 'hs' },
-            { label: 'Average (Ave)', key: 'avg' },
-            { label: 'Strike Rate (SR)', key: 'sr' },
-            { label: '100s', key: '100s' },
-            { label: '50s', key: '50s' }
-          ];
-
-          const bowlMetrics = [
-            { label: 'Matches', key: 'm' },
-            { label: 'Innings', key: 'inn' },
-            { label: 'Wickets', key: 'wkts' },
-            { label: 'Best (BBI)', key: 'bbi' },
-            { label: 'Economy (Econ)', key: 'econ' },
-            { label: 'Average (Ave)', key: 'avg' },
-            { label: '5 Wickets (5W)', key: '5w' }
-          ];
-
-          const batTableRows = batMetrics.map(m => `
-            <tr>
-              <td>${m.label}</td>
-              ${formats.map(f => `<td>${getStat('batting', f, m.key)}</td>`).join('')}
-            </tr>
-          `).join('');
-
-          const bowlTableRows = bowlMetrics.map(m => `
-            <tr>
-              <td>${m.label}</td>
-              ${formats.map(f => `<td>${getStat('bowling', f, m.key)}</td>`).join('')}
-            </tr>
-          `).join('');
-
-          box.innerHTML = `
-            <div style="display:flex; gap:12px; align-items:center; background:#090d16; padding:12px; border-radius:14px; border:1px solid var(--border);">
-              <img src="${p.playerImg || 'https://h.cricapi.com/img/icon512.png'}" style="width:62px; height:62px; border-radius:50%; object-fit:cover; border:2px solid var(--green);">
-              <div>
-                <h3 style="font-size:17px; color:#fff;">${p.name}</h3>
-                <div style="font-size:12px; color:var(--blue); font-weight:700;">${p.country || ''} • ${p.role || ''}</div>
-                <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${t.battingLbl} <strong style="color:#fff;">${p.battingStyle || '-'}</strong></div>
-                <div style="font-size:11px; color:var(--text-muted);">${t.bowlingLbl} <strong style="color:#fff;">${p.bowlingStyle || '-'}</strong></div>
-              </div>
-            </div>
-
-            <div class="career-sec-title">${t.batSummaryTitle}</div>
-            <div class="career-table-wrap">
-              <table class="career-table">
-                <thead>
-                  <tr>
-                    <th>Format</th>
-                    <th>Test</th>
-                    <th>ODI</th>
-                    <th>T20I</th>
-                    <th>IPL</th>
-                  </tr>
-                </thead>
-                <tbody>${batTableRows}</tbody>
-              </table>
-            </div>
-
-            <div class="career-sec-title">${t.bowlSummaryTitle}</div>
-            <div class="career-table-wrap">
-              <table class="career-table">
-                <thead>
-                  <tr>
-                    <th>Format</th>
-                    <th>Test</th>
-                    <th>ODI</th>
-                    <th>T20I</th>
-                    <th>IPL</th>
-                  </tr>
-                </thead>
-                <tbody>${bowlTableRows}</tbody>
-              </table>
-            </div>
-          `;
-        } else {
-          box.innerHTML = `<p style="font-size:13px; color:var(--text-muted);">Player career data unavailable.</p>`;
-        }
-      } catch (e) {
-        box.innerHTML = `<p style="font-size:13px; color:var(--red);">Error loading player stats.</p>`;
-      }
-    }
-
-    function closeMatchDetail() { document.getElementById('matchDetailModal').style.display = 'none'; }
-    function switchSubTab(paneId, el) {
-      document.querySelectorAll('.sub-pane').forEach(p => p.style.display = 'none');
-      document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
-      document.getElementById(paneId).style.display = 'block';
-      el.classList.add('active');
-    }
-
-    // =========================================================
-    // LIVE TV (FEATURED + AUTO 100+ IPTV)
-    // =========================================================
-    const featuredChannels = [
-      { name: "Red Bull TV (24/7 Sports)", category: "Live Sports", icon: "🏆", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8" },
-      { name: "FIFA+ Live Football", category: "Football", icon: "⚽", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8" },
-      { name: "Dubai Sports 1", category: "Cricket & Football", icon: "🏏", url: "https://dmisxthvll.cdn.mgmlcdn.com/dubaisports/smil:dubaisports.stream.smil/playlist.m3u8" },
-      { name: "Dubai Sports 2", category: "Sports HD", icon: "📺", url: "https://dmisxthvll.cdn.mgmlcdn.com/dubaisports2/smil:dubaisports2.stream.smil/playlist.m3u8" },
-      { name: "Sharjah Sports HD", category: "Football & Sports", icon: "🏟️", url: "https://svs.itworkscdn.net/smc4sportslive/smc4.smil/playlist.m3u8" },
-      { name: "Trace Sport Stars", category: "Sports News", icon: "⚡", url: "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01076-tracetv-tracesport-samsunguk/playlist.m3u8" },
-      { name: "Unbeaten Sports", category: "Multi-Sports", icon: "🔥", url: "https://unbeaten-roku.amagi.tv/playlist.m3u8" },
-      { name: "SportsGrid Live", category: "Sports Analysis", icon: "📊", url: "https://sportsgrid-klowdtv.amagi.tv/playlist.m3u8" }
-    ];
-
-    let hls = null, adInterval = null, autoChannelsList = [];
-    const fGrid = document.getElementById('featuredTvGrid');
-    featuredChannels.forEach(ch => {
-      const d = document.createElement('div');
-      d.className = 'tv-card';
-      d.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div class="tv-icon-badge">${ch.icon}</div>
-          <span style="font-size:10px; color:var(--green); font-weight:700;">★ ${ch.category}</span>
-        </div>
-        <div style="font-size:13px; font-weight:700; color:#fff;">${ch.name}</div>
-      `;
-      d.onclick = () => startChannelWithAd(ch.url, ch.name);
-      fGrid.appendChild(d);
-    });
-
-    async function loadAutoIptvChannels() {
       try {
-        const res = await fetch("https://iptv-org.github.io/iptv/categories/sports.m3u");
-        const lines = (await res.text()).split('\n');
-        let name = "";
-        lines.forEach(l => {
-          l = l.trim();
-          if (l.startsWith("#EXTINF:")) name = l.split(",").pop().trim();
-          else if (l.startsWith("http") && name) { autoChannelsList.push({ name, url: l }); name = ""; }
-        });
-        document.getElementById('autoCountBadge').innerText = `${autoChannelsList.length}+ Channels`;
-        renderAutoChannels(autoChannelsList.slice(0, 120));
+        const sq = await getJson(`https://api.cricapi.com/v1/match_squad?apikey=${CONFIG.API_KEY}&id=${m.id}`);
+        if (sq.status === 'success' && sq.data && sq.data.length) {
+          document.getElementById('pSq').innerHTML = sq.data.map(tm => `<h4 style="color:var(--green); margin:10px 0 6px;">🏏 ${tm.teamName}</h4><div class="squad-grid">${(tm.players||[]).map(p=>`<div class="player-card" onclick="openPlayer('${p.id}','${p.name.replace(/'/g,'')}')"><img class="p-avatar" src="${p.playerImg||'https://h.cricapi.com/img/icon512.png'}"><div><div style="font-size:12px;font-weight:700;">${p.name}</div><div style="font-size:10px;color:var(--muted);">${p.role||''}</div></div></div>`).join('')}</div>`).join('');
+        } else { document.getElementById('pSq').innerHTML = '<p style="color:var(--muted);">Squads not available yet.</p>'; }
       } catch (e) {}
     }
 
-    function renderAutoChannels(list) {
-      const g = document.getElementById('autoChannelGrid');
-      g.innerHTML = "";
+    async function openPlayer(pid, pname) {
+      document.getElementById('careerModal').style.display = 'flex';
+      const body = document.getElementById('careerBody');
+      body.innerHTML = `<p style="color:var(--green);">Loading ${pname}...</p>`;
+      try {
+        const res = await getJson(`https://api.cricapi.com/v1/players_info?apikey=${CONFIG.API_KEY}&id=${pid}`);
+        if (res.status === 'success' && res.data) {
+          const p = res.data, st = p.stats || [];
+          const val = (fn, fmt, k) => { const f = st.find(x => x.fn===fn && x.matchtype===fmt && x.stat===k); return f && f.value ? f.value : '-'; };
+          const fmts = ['test','odi','t20i','ipl'];
+          const batRows = [['Matches','m'],['Innings','inn'],['Runs','runs'],['Highest','hs'],['Average','avg'],['Strike Rate','sr'],['100s','100s'],['50s','50s']].map(r=>`<tr><td>${r[0]}</td>${fmts.map(f=>`<td>${val('batting',f,r[1])}</td>`).join('')}</tr>`).join('');
+          const bowlRows = [['Matches','m'],['Innings','inn'],['Wickets','wkts'],['Best','bbi'],['Economy','econ'],['Average','avg'],['5W','5w']].map(r=>`<tr><td>${r[0]}</td>${fmts.map(f=>`<td>${val('bowling',f,r[1])}</td>`).join('')}</tr>`).join('');
+          body.innerHTML = `
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+              <img src="${p.playerImg||'https://h.cricapi.com/img/icon512.png'}" style="width:54px; height:54px; border-radius:50%; border:2px solid var(--green);">
+              <div><h3>${p.name}</h3><div style="font-size:12px; color:var(--blue);">${p.country||''} • ${p.role||''}</div><div style="font-size:11px; color:var(--muted);">Bat: ${p.battingStyle||'-'} | Bowl: ${p.bowlingStyle||'-'}</div></div>
+            </div>
+            <div style="color:var(--gold); font-weight:700; font-size:12px; margin:8px 0 4px;">🏏 Batting Career Summary</div>
+            <div class="inning-box"><table class="career-table"><thead><tr><th>Format</th><th>Test</th><th>ODI</th><th>T20I</th><th>IPL</th></tr></thead><tbody>${batRows}</tbody></table></div>
+            <div style="color:var(--gold); font-weight:700; font-size:12px; margin:8px 0 4px;">🎯 Bowling Career Summary</div>
+            <div class="inning-box"><table class="career-table"><thead><tr><th>Format</th><th>Test</th><th>ODI</th><th>T20I</th><th>IPL</th></tr></thead><tbody>${bowlRows}</tbody></table></div>`;
+        }
+      } catch (e) {}
+    }
+
+    function switchSub(id, el) {
+      document.querySelectorAll('.sub-pane').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(id).style.display = 'block';
+      el.classList.add('active');
+    }
+
+    const fastChannels = [
+      { name: "Red Bull TV (24/7 Sports)", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8" },
+      { name: "FIFA+ Live Football", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8" },
+      { name: "Dubai Sports 1", url: "https://dmisxthvll.cdn.mgmlcdn.com/dubaisports/smil:dubaisports.stream.smil/playlist.m3u8" },
+      { name: "Dubai Sports 2", url: "https://dmisxthvll.cdn.mgmlcdn.com/dubaisports2/smil:dubaisports2.stream.smil/playlist.m3u8" },
+      { name: "Sharjah Sports HD", url: "https://svs.itworkscdn.net/smc4sportslive/smc4.smil/playlist.m3u8" },
+      { name: "Trace Sport Stars", url: "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01076-tracetv-tracesport-samsunguk/playlist.m3u8" }
+    ];
+
+    let hls = null, adTimer = null, autoTv = [];
+    const fg = document.getElementById('fastTvGrid');
+    fastChannels.forEach(ch => {
+      const d = document.createElement('div');
+      d.className = 'tv-card';
+      d.innerHTML = `<span style="font-size:10px; color:var(--green); font-weight:700;">★ FAST HD</span><div style="font-size:13px; font-weight:700; margin-top:4px;">${ch.name}</div>`;
+      d.onclick = () => playWithAd(ch.url, ch.name);
+      fg.appendChild(d);
+    });
+
+    async function loadAutoTv() {
+      try {
+        const txt = await (await fetch("https://iptv-org.github.io/iptv/categories/sports.m3u")).text();
+        let nm = "";
+        txt.split('\n').forEach(l => {
+          l = l.trim();
+          if (l.startsWith("#EXTINF:")) nm = l.split(",").pop().trim();
+          else if (l.startsWith("http") && nm) { autoTv.push({ name: nm, url: l }); nm = ""; }
+        });
+        document.getElementById('autoBadge').innerText = `${autoTv.length}+ Channels`;
+        renderAutoTv(autoTv.slice(0, 120));
+      } catch (e) {}
+    }
+
+    function renderAutoTv(list) {
+      const g = document.getElementById('autoTvGrid'); g.innerHTML = '';
       list.forEach(ch => {
         const d = document.createElement('div');
         d.className = 'tv-card';
-        d.innerHTML = `<span style="font-size:10px; color:var(--blue); font-weight:700;">● FREE LIVE TV</span><div style="font-size:13px; font-weight:700; margin-top:4px;">${ch.name}</div>`;
-        d.onclick = () => startChannelWithAd(ch.url, ch.name);
+        d.innerHTML = `<span style="font-size:10px; color:var(--blue); font-weight:700;">● FREE TV</span><div style="font-size:13px; font-weight:700; margin-top:4px;">${ch.name}</div>`;
+        d.onclick = () => playWithAd(ch.url, ch.name);
         g.appendChild(d);
       });
     }
 
-    function filterAutoChannels() {
-      const q = document.getElementById('channelSearch').value.toLowerCase();
-      renderAutoChannels(autoChannelsList.filter(c => c.name.toLowerCase().includes(q)).slice(0, 120));
+    function filterTv() {
+      const q = document.getElementById('tvSearch').value.toLowerCase();
+      renderAutoTv(autoTv.filter(c => c.name.toLowerCase().includes(q)).slice(0, 120));
     }
 
-    function startChannelWithAd(url, name) {
-      const t = i18n[currentLang] || i18n.en;
-      const overlay = document.getElementById('adOverlay');
-      const timerSpan = document.getElementById('timerCount');
-      const video = document.getElementById('hlsPlayer');
+    function playWithAd(url, name) {
+      const ov = document.getElementById('adOverlay'), ts = document.getElementById('timerSec'), vid = document.getElementById('hlsPlayer');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.getElementById('nowPlayingText').innerText = `${t.nowPlayingLoading} ${name}...`;
-      video.pause();
-      clearInterval(adInterval);
-      let sec = 10;
-      timerSpan.innerText = sec;
-      overlay.style.display = 'flex';
-      adInterval = setInterval(() => {
-        sec--;
-        timerSpan.innerText = sec;
-        if (sec <= 0) {
-          clearInterval(adInterval);
-          overlay.style.display = 'none';
-          document.getElementById('nowPlayingText').innerText = `${t.nowPlayingLive} ${name}`;
-          if (Hls.isSupported()) {
-            if (hls) hls.destroy();
-            hls = new Hls(); hls.loadSource(url); hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-          } else { video.src = url; video.play(); }
+      document.getElementById('nowPlaying').innerText = `⏳ Loading: ${name}...`;
+      vid.pause(); clearInterval(adTimer);
+      let s = 10; ts.innerText = s; ov.style.display = 'flex';
+      adTimer = setInterval(() => {
+        s--; ts.innerText = s;
+        if (s <= 0) {
+          clearInterval(adTimer); ov.style.display = 'none';
+          document.getElementById('nowPlaying').innerText = `▶️ Live: ${name}`;
+          if (Hls.isSupported()) { if (hls) hls.destroy(); hls = new Hls(); hls.loadSource(url); hls.attachMedia(vid); hls.on(Hls.Events.MANIFEST_PARSED, () => vid.play()); }
+          else { vid.src = url; vid.play(); }
         }
       }, 1000);
     }
 
-    async function loadAutoYouTubeVideos() {
-      const ytList = document.getElementById('ytList');
-      const rssUrl = encodeURIComponent("https://www.youtube.com/feeds/videos.xml?channel_id=UCt2jxGk2fw704_7yX20r-2w");
+    async function loadVideos() {
+      const rss = encodeURIComponent(`https://www.youtube.com/feeds/videos.xml?channel_id=${CONFIG.YT_CHANNEL}`);
       try {
-        const data = await (await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`)).json();
-        if (data.items && data.items.length) {
-          ytList.innerHTML = "";
-          document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${data.items[0].guid.split(":")[2]}`;
-          data.items.slice(0, 8).forEach(item => {
-            const vid = item.guid.split(":")[2];
-            const c = document.createElement('div');
-            c.className = 'yt-card';
-            c.innerHTML = `<img class="yt-thumb" src="https://i.ytimg.com/vi/${vid}/mqdefault.jpg"><div><h4 style="font-size:13px;">${item.title}</h4><span style="font-size:11px; color:var(--text-muted);">${item.author}</span></div>`;
+        const d = await (await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rss}`)).json();
+        if (d.items && d.items.length) {
+          const list = document.getElementById('ytList'); list.innerHTML = '';
+          document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${d.items[0].guid.split(':')[2]}`;
+          d.items.slice(0, 8).forEach(it => {
+            const vid = it.guid.split(':')[2];
+            const c = document.createElement('div'); c.className = 'yt-card';
+            c.innerHTML = `<img class="yt-thumb" src="https://i.ytimg.com/vi/${vid}/mqdefault.jpg"><div><h4 style="font-size:13px;">${it.title}</h4><span style="font-size:11px; color:var(--muted);">${it.author}</span></div>`;
             c.onclick = () => { document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${vid}?autoplay=1`; window.scrollTo({ top: 0, behavior: 'smooth' }); };
-            ytList.appendChild(c);
+            list.appendChild(c);
           });
         }
       } catch (e) {}
     }
 
-    function switchMainTab(id, btn) {
+    function switchTab(id, btn) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(id).classList.add('active');
@@ -1144,8 +536,8 @@
     }
 
     loadMatches();
-    loadAutoIptvChannels();
-    loadAutoYouTubeVideos();
+    loadAutoTv();
+    loadVideos();
   </script>
 </body>
 </html>
