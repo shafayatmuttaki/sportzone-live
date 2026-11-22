@@ -8,10 +8,10 @@
   <style>
     * { box-sizing:border-box; margin:0; padding:0; font-family:sans-serif; }
     body { background:#070b14; color:#fff; padding-bottom:65px; }
-    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.94); z-index:999; display:flex; justify-content:center; align-items:center; padding:20px; }
-    .box { background:#131c31; border:2px solid #00e676; border-radius:16px; padding:22px; width:100%; max-width:360px; text-align:center; }
-    .btn { width:100%; padding:12px; margin-top:10px; background:#1e293b; border:1px solid #38bdf8; border-radius:10px; color:#fff; font-size:16px; font-weight:bold; cursor:pointer; }
-    header { background:#0f172a; padding:14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b; position:sticky; top:0; z-index:10; }
+    header { background:#0f172a; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b; position:sticky; top:0; z-index:10; }
+    .lang-group { display:flex; gap:5px; }
+    .lbtn { background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:4px 9px; border-radius:12px; font-size:11px; font-weight:bold; cursor:pointer; }
+    .lbtn.active { background:#00e676; color:#000; border-color:#00e676; }
     .nav { display:flex; background:#0f172a; padding:8px; gap:8px; position:sticky; top:48px; z-index:9; }
     .nav button { flex:1; padding:10px; border:none; border-radius:8px; background:#1e293b; color:#94a3b8; font-weight:bold; cursor:pointer; }
     .nav button.active { background:#00e676; color:#000; }
@@ -24,6 +24,8 @@
     .pbox { position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden; margin-bottom:12px; }
     video, iframe { width:100%; height:100%; border:none; }
     #ad { position:absolute; inset:0; background:#070b14; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:20; }
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:999; display:none; justify-content:center; align-items:flex-start; overflow-y:auto; padding:20px; }
+    .box { background:#131c31; border:2px solid #00e676; border-radius:16px; padding:20px; width:100%; max-width:600px; }
     table { width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; }
     th, td { padding:7px; border-bottom:1px solid #263554; text-align:left; }
     th { color:#38bdf8; }
@@ -31,18 +33,9 @@
   </style>
 </head>
 <body>
-  <div class="modal" id="lMod">
-    <div class="box">
-      <h2 style="color:#00e676;margin-bottom:6px;">SportZone Pro</h2>
-      <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">Select Language / ভাষা নির্বাচন করুন</p>
-      <button class="btn" onclick="pickLang('en')">English</button>
-      <button class="btn" onclick="pickLang('bn')">বাংলা (Bangla)</button>
-      <button class="btn" onclick="pickLang('hi')">हिन्दी (Hindi)</button>
-    </div>
-  </div>
 
-  <div class="modal" id="dMod" style="display:none;align-items:flex-start;overflow-y:auto;">
-    <div class="box" style="max-width:600px;text-align:left;">
+  <div class="modal" id="dMod">
+    <div class="box">
       <button onclick="document.getElementById('dMod').style.display='none'" style="background:#00e676;color:#000;border:none;padding:6px 14px;border-radius:6px;font-weight:bold;margin-bottom:10px;cursor:pointer;">← Back</button>
       <div id="dBody"></div>
     </div>
@@ -50,7 +43,11 @@
 
   <header>
     <div style="font-size:18px;font-weight:bold;color:#00e676;">⚡ SportZone Pro</div>
-    <button onclick="document.getElementById('lMod').style.display='flex'" style="background:#1e293b;color:#38bdf8;border:1px solid #38bdf8;padding:4px 12px;border-radius:20px;font-weight:bold;cursor:pointer;" id="lTag">EN</button>
+    <div class="lang-group">
+      <button class="lbtn active" id="le" onclick="setL('en',this)">EN</button>
+      <button class="lbtn" id="lb" onclick="setL('bn',this)">বাংলা</button>
+      <button class="lbtn" id="lh" onclick="setL('hi',this)">हिन्दी</button>
+    </div>
   </header>
 
   <div class="nav">
@@ -66,7 +63,7 @@
         <div id="ad"><div style="border:1px dashed #00e676;padding:16px;border-radius:8px;color:#00e676;font-weight:bold;margin-bottom:8px;">SPONSORED AD (300x100)</div><div style="color:#00e676;">Starts in <span id="cnt">10</span>s...</div></div>
         <video id="vid" controls playsinline></video>
       </div>
-      <div id="tvMsg" style="color:#00e676;font-size:13px;margin-bottom:10px;">Select a channel:</div>
+      <div id="tvMsg" style="color:#00e676;font-size:13px;margin-bottom:10px;">Select any channel below:</div>
       <div class="grid" id="tvGrid"></div>
     </div>
     <div id="s3" class="sec">
@@ -79,22 +76,21 @@
   <script>
     const KEY = "25d6a156-f7a3-4f24-8985-6a08f1e96202";
     const txt = {
-      en: { tag:"EN", n1:"🏏 Matches", n2:"📺 Live TV", n3:"🎬 Videos", sc:"Scorecard ➔" },
-      bn: { tag:"বাংলা", n1:"🏏 ম্যাচসমূহ", n2:"📺 লাইভ টিভি", n3:"🎬 ভিডিও", sc:"স্কোরকার্ড ➔" },
-      hi: { tag:"हिन्दी", n1:"🏏 मैच", n2:"📺 लाइव टीवी", n3:"🎬 वीडियो", sc:"स्कोरकार्ड ➔" }
+      en: { n1:"🏏 Matches", n2:"📺 Live TV", n3:"🎬 Videos", sc:"Scorecard ➔" },
+      bn: { n1:"🏏 ম্যাচসমূহ", n2:"📺 লাইভ টিভি", n3:"🎬 ভিডিও", sc:"স্কোরকার্ড ➔" },
+      hi: { n1:"🏏 मैच", n2:"📺 लाइव टीवी", n3:"🎬 वीडियो", sc:"स्कोरकार्ड ➔" }
     };
-    let lang = localStorage.getItem('sz_lang') || '';
-    function pickLang(l) {
-      lang = l; localStorage.setItem('sz_lang', l);
-      document.getElementById('lMod').style.display = 'none';
-      const t = txt[l] || txt.en;
-      document.getElementById('lTag').innerText = t.tag;
+    let lang = 'en';
+    function setL(l, b) {
+      lang = l;
+      document.querySelectorAll('.lbtn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const t = txt[l];
       document.getElementById('n1').innerText = t.n1;
       document.getElementById('n2').innerText = t.n2;
       document.getElementById('n3').innerText = t.n3;
-      if (list.length) render();
+      render();
     }
-    if (lang) pickLang(lang);
 
     let list = [
       { id:"1", name:"Bangladesh vs India, 1st T20I", status:"Bangladesh won by 6 wickets", venue:"Mirpur Stadium, Dhaka", teams:["Bangladesh","India"], score:[{r:178,w:4,o:19.2},{r:174,w:7,o:20}] },
@@ -102,11 +98,11 @@
     ];
 
     async function load() {
+      render();
       try {
         const r = await fetch('./scores.json?v=' + Date.now());
-        if (r.ok) { const j = await r.json(); if (j && j.data && j.data.length) list = j.data; }
+        if (r.ok) { const j = await r.json(); if (j && j.data && j.data.length) { list = j.data; render(); } }
       } catch(e) {}
-      render();
     }
 
     function render() {
