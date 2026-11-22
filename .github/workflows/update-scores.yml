@@ -1,0 +1,23 @@
+name: Auto Update Live Cricket Scores
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-scores:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch CricAPI Data
+        run: |
+          curl -s "https://api.cricapi.com/v1/currentMatches?apikey=25d6a156-f7a3-4f24-8985-6a08f1e96202&offset=0" -o scores.json
+      - name: Save to GitHub Cache
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "SportZone Bot"
+          git add scores.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update scores" && git push)
