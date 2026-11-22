@@ -1,219 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SportZone Pro - Live Cricket & TV</title>
+  <title>SportZone Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    body { background: #070b14; color: #fff; padding-bottom: 70px; }
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; display: flex; justify-content: center; align-items: center; padding: 20px; }
-    .modal-box { background: #131c31; border: 2px solid #00e676; border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; text-align: center; }
-    .l-btn { width: 100%; padding: 12px; margin-top: 10px; background: #1e293b; border: 1px solid #38bdf8; border-radius: 10px; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; }
-    header { background: #0f172a; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; position: sticky; top: 0; z-index: 50; }
-    .nav { display: flex; background: #0f172a; padding: 8px; gap: 8px; position: sticky; top: 50px; z-index: 49; }
-    .nav button { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #1e293b; color: #94a3b8; font-weight: bold; cursor: pointer; }
-    .nav button.active { background: #00e676; color: #000; }
-    .wrap { padding: 14px; max-width: 720px; margin: auto; }
-    .sec { display: none; }
-    .sec.active { display: block; }
-    .card { background: #151f34; border: 1px solid #263554; border-radius: 12px; padding: 14px; margin-bottom: 12px; cursor: pointer; }
-    .badge { background: #ff3b5c; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: bold; }
-    .row { display: flex; justify-content: space-between; margin: 8px 0; font-size: 16px; font-weight: bold; }
-    .status { color: #fbbf24; font-size: 13px; border-top: 1px solid #263554; padding-top: 8px; margin-top: 8px; display: flex; justify-content: space-between; }
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .player-box { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
-    video, iframe { width: 100%; height: 100%; border: none; }
-    #adBox { position: absolute; inset: 0; background: #070b14; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10; text-align: center; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-    th, td { padding: 8px; border-bottom: 1px solid #263554; text-align: left; }
-    th { color: #38bdf8; }
-    .p-link { color: #38bdf8; text-decoration: underline; cursor: pointer; font-weight: bold; }
-    .ad-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 50px; background: #0f172a; border-top: 1px solid #263554; display: flex; justify-content: center; align-items: center; font-size: 12px; color: #94a3b8; }
+    * { box-sizing:border-box; margin:0; padding:0; font-family:sans-serif; }
+    body { background:#070b14; color:#fff; padding-bottom:65px; }
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.94); z-index:999; display:flex; justify-content:center; align-items:center; padding:20px; }
+    .box { background:#131c31; border:2px solid #00e676; border-radius:16px; padding:22px; width:100%; max-width:360px; text-align:center; }
+    .btn { width:100%; padding:12px; margin-top:10px; background:#1e293b; border:1px solid #38bdf8; border-radius:10px; color:#fff; font-size:16px; font-weight:bold; cursor:pointer; }
+    header { background:#0f172a; padding:14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b; position:sticky; top:0; z-index:10; }
+    .nav { display:flex; background:#0f172a; padding:8px; gap:8px; position:sticky; top:48px; z-index:9; }
+    .nav button { flex:1; padding:10px; border:none; border-radius:8px; background:#1e293b; color:#94a3b8; font-weight:bold; cursor:pointer; }
+    .nav button.active { background:#00e676; color:#000; }
+    .wrap { padding:14px; max-width:700px; margin:auto; }
+    .sec { display:none; }
+    .sec.active { display:block; }
+    .card { background:#151f34; border:1px solid #263554; border-radius:12px; padding:14px; margin-bottom:12px; cursor:pointer; }
+    .row { display:flex; justify-content:space-between; margin:6px 0; font-size:16px; font-weight:bold; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .pbox { position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden; margin-bottom:12px; }
+    video, iframe { width:100%; height:100%; border:none; }
+    #ad { position:absolute; inset:0; background:#070b14; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:20; }
+    table { width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; }
+    th, td { padding:7px; border-bottom:1px solid #263554; text-align:left; }
+    th { color:#38bdf8; }
+    .adbar { position:fixed; bottom:0; left:0; right:0; height:50px; background:#0f172a; border-top:1px solid #263554; display:flex; justify-content:center; align-items:center; font-size:12px; color:#94a3b8; }
   </style>
 </head>
 <body>
-
-  <div class="modal" id="langModal">
-    <div class="modal-box">
-      <h2 style="color:#00e676; margin-bottom:6px;">SportZone Pro</h2>
-      <p style="font-size:13px; color:#94a3b8; margin-bottom:12px;">Select Language / ভাষা নির্বাচন করুন</p>
-      <button class="l-btn" onclick="setLang('en')">English</button>
-      <button class="l-btn" onclick="setLang('bn')">বাংলা (Bangla)</button>
-      <button class="l-btn" onclick="setLang('hi')">हिन्दी (Hindi)</button>
+  <div class="modal" id="lMod">
+    <div class="box">
+      <h2 style="color:#00e676;margin-bottom:6px;">SportZone Pro</h2>
+      <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">Select Language / ভাষা নির্বাচন করুন</p>
+      <button class="btn" onclick="pickLang('en')">English</button>
+      <button class="btn" onclick="pickLang('bn')">বাংলা (Bangla)</button>
+      <button class="btn" onclick="pickLang('hi')">हिन्दी (Hindi)</button>
     </div>
   </div>
 
-  <div class="modal" id="detailModal" style="display:none; align-items:flex-start; overflow-y:auto;">
-    <div class="modal-box" style="max-width:650px; text-align:left;">
-      <button onclick="document.getElementById('detailModal').style.display='none'" style="background:#00e676; color:#000; border:none; padding:6px 14px; border-radius:6px; font-weight:bold; margin-bottom:12px; cursor:pointer;">← Back</button>
-      <div id="detailContent"></div>
-    </div>
-  </div>
-
-  <div class="modal" id="playerModal" style="display:none; z-index:1001;">
-    <div class="modal-box" style="max-width:480px; text-align:left;">
-      <button onclick="document.getElementById('playerModal').style.display='none'" style="background:#ff3b5c; color:#fff; border:none; padding:5px 12px; border-radius:6px; font-weight:bold; float:right; cursor:pointer;">✕</button>
-      <div id="playerContent"></div>
+  <div class="modal" id="dMod" style="display:none;align-items:flex-start;overflow-y:auto;">
+    <div class="box" style="max-width:600px;text-align:left;">
+      <button onclick="document.getElementById('dMod').style.display='none'" style="background:#00e676;color:#000;border:none;padding:6px 14px;border-radius:6px;font-weight:bold;margin-bottom:10px;cursor:pointer;">← Back</button>
+      <div id="dBody"></div>
     </div>
   </div>
 
   <header>
-    <div style="font-size:19px; font-weight:bold; color:#00e676;">⚡ SportZone Pro</div>
-    <button onclick="document.getElementById('langModal').style.display='flex'" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:5px 12px; border-radius:20px; font-weight:bold; cursor:pointer;" id="langTag">EN</button>
+    <div style="font-size:18px;font-weight:bold;color:#00e676;">⚡ SportZone Pro</div>
+    <button onclick="document.getElementById('lMod').style.display='flex'" style="background:#1e293b;color:#38bdf8;border:1px solid #38bdf8;padding:4px 12px;border-radius:20px;font-weight:bold;cursor:pointer;" id="lTag">EN</button>
   </header>
 
   <div class="nav">
-    <button class="active" id="b1" onclick="showTab('t1', this)">🏏 Matches</button>
-    <button id="b2" onclick="showTab('t2', this)">📺 Live TV</button>
-    <button id="b3" onclick="showTab('t3', this)">🎬 Videos</button>
+    <button class="active" id="n1" onclick="tab('s1',this)">🏏 Matches</button>
+    <button id="n2" onclick="tab('s2',this)">📺 Live TV</button>
+    <button id="n3" onclick="tab('s3',this)">🎬 Videos</button>
   </div>
 
   <div class="wrap">
-    <div id="t1" class="sec active">
-      <div id="matchArea">Loading...</div>
-    </div>
-
-    <div id="t2" class="sec">
-      <div class="player-box">
-        <div id="adBox">
-          <div style="border:1px dashed #00e676; padding:20px; border-radius:10px; margin-bottom:10px;">
-            <strong style="color:#00e676;">SPONSORED AD (300x100)</strong>
-          </div>
-          <div style="color:#00e676; font-weight:bold;">Starts in <span id="sec">10</span>s...</div>
-        </div>
-        <video id="tvVid" controls playsinline></video>
+    <div id="s1" class="sec active"><div id="mList">Loading...</div></div>
+    <div id="s2" class="sec">
+      <div class="pbox">
+        <div id="ad"><div style="border:1px dashed #00e676;padding:16px;border-radius:8px;color:#00e676;font-weight:bold;margin-bottom:8px;">SPONSORED AD (300x100)</div><div style="color:#00e676;">Starts in <span id="cnt">10</span>s...</div></div>
+        <video id="vid" controls playsinline></video>
       </div>
-      <div id="tvStatus" style="color:#00e676; font-size:13px; margin-bottom:12px;">Select a channel below:</div>
-      <div class="grid" id="tvList"></div>
+      <div id="tvMsg" style="color:#00e676;font-size:13px;margin-bottom:10px;">Select a channel:</div>
+      <div class="grid" id="tvGrid"></div>
     </div>
-
-    <div id="t3" class="sec">
-      <div class="player-box"><iframe id="ytBox" src="https://www.youtube.com/embed/live_stream?channel=UCt2jxGk2fw704_7yX20r-2w" allowfullscreen></iframe></div>
-      <div id="vidList"></div>
+    <div id="s3" class="sec">
+      <div class="pbox"><iframe src="https://www.youtube.com/embed/live_stream?channel=UCt2jxGk2fw704_7yX20r-2w" allowfullscreen></iframe></div>
     </div>
   </div>
 
-  <div class="ad-bar">[ Banner Ad Space: 320x50 ]</div>
+  <div class="adbar">[ Banner Ad Space: 320x50 ]</div>
 
   <script>
-    const API_KEY = "25d6a156-f7a3-4f24-8985-6a08f1e96202";
-    const dict = {
-      en: { tag:"EN", b1:"🏏 Matches", b2:"📺 Live TV", b3:"🎬 Videos", sc:"Full Scorecard ➔" },
-      bn: { tag:"বাংলা", b1:"🏏 ম্যাচসমূহ", b2:"📺 লাইভ টিভি", b3:"🎬 ভিডিও", sc:"স্কোরকার্ড ➔" },
-      hi: { tag:"हिन्दी", b1:"🏏 मैच", b2:"📺 लाइव टीवी", b3:"🎬 वीडियो", sc:"स्कोरकार्ड ➔" }
+    const KEY = "25d6a156-f7a3-4f24-8985-6a08f1e96202";
+    const txt = {
+      en: { tag:"EN", n1:"🏏 Matches", n2:"📺 Live TV", n3:"🎬 Videos", sc:"Scorecard ➔" },
+      bn: { tag:"বাংলা", n1:"🏏 ম্যাচসমূহ", n2:"📺 লাইভ টিভি", n3:"🎬 ভিডিও", sc:"স্কোরকার্ড ➔" },
+      hi: { tag:"हिन्दी", n1:"🏏 मैच", n2:"📺 लाइव टीवी", n3:"🎬 वीडियो", sc:"स्कोरकार्ड ➔" }
     };
-    let curLang = localStorage.getItem('sz_l') || '';
-    function setLang(l) {
-      curLang = l; localStorage.setItem('sz_l', l);
-      document.getElementById('langModal').style.display = 'none';
-      const t = dict[l] || dict.en;
-      document.getElementById('langTag').innerText = t.tag;
-      document.getElementById('b1').innerText = t.b1;
-      document.getElementById('b2').innerText = t.b2;
-      document.getElementById('b3').innerText = t.b3;
-      if (allData.length) drawMatches();
+    let lang = localStorage.getItem('sz_lang') || '';
+    function pickLang(l) {
+      lang = l; localStorage.setItem('sz_lang', l);
+      document.getElementById('lMod').style.display = 'none';
+      const t = txt[l] || txt.en;
+      document.getElementById('lTag').innerText = t.tag;
+      document.getElementById('n1').innerText = t.n1;
+      document.getElementById('n2').innerText = t.n2;
+      document.getElementById('n3').innerText = t.n3;
+      if (list.length) render();
     }
-    if (curLang) setLang(curLang);
+    if (lang) pickLang(lang);
 
-    const demoData = [
-      { id: "d1", name: "Bangladesh vs India, 1st T20I", matchType: "T20", status: "Bangladesh won by 6 wickets", venue: "Mirpur Stadium, Dhaka", date: "2026-11-22", teams: ["Bangladesh", "India"], score: [{ r: 178, w: 4, o: 19.2, inning: "Bangladesh" }, { r: 174, w: 7, o: 20, inning: "India" }] },
-      { id: "d2", name: "Australia vs England, 2nd ODI", matchType: "ODI", status: "Australia need 42 runs", venue: "MCG, Melbourne", date: "2026-11-22", teams: ["Australia", "England"], score: [{ r: 245, w: 5, o: 44, inning: "Australia" }, { r: 286, w: 8, o: 50, inning: "England" }] }
+    let list = [
+      { id:"1", name:"Bangladesh vs India, 1st T20I", status:"Bangladesh won by 6 wickets", venue:"Mirpur Stadium, Dhaka", teams:["Bangladesh","India"], score:[{r:178,w:4,o:19.2},{r:174,w:7,o:20}] },
+      { id:"2", name:"Australia vs England, 2nd ODI", status:"Australia need 42 runs", venue:"MCG, Melbourne", teams:["Australia","England"], score:[{r:245,w:5,o:44},{r:286,w:8,o:50}] }
     ];
 
-    let allData = [];
-    async function initMatches() {
-      let found = null;
+    async function load() {
       try {
-        const r1 = await fetch('./scores.json?v=' + Date.now());
-        if (r1.ok) { const j1 = await r1.json(); if (j1 && j1.data && j1.data.length) found = j1.data; }
-      } catch (e) {}
-      if (!found) {
-        try {
-          const r2 = await fetch('https://api.cricapi.com/v1/currentMatches?apikey=' + API_KEY + '&offset=0');
-          const j2 = await r2.json();
-          if (j2 && j2.data && j2.data.length) found = j2.data;
-        } catch (e) {}
-      }
-      allData = found || demoData;
-      drawMatches();
+        const r = await fetch('./scores.json?v=' + Date.now());
+        if (r.ok) { const j = await r.json(); if (j && j.data && j.data.length) list = j.data; }
+      } catch(e) {}
+      render();
     }
 
-    function drawMatches() {
-      const t = dict[curLang] || dict.en;
-      const box = document.getElementById('matchArea');
-      box.innerHTML = allData.map((m, idx) => {
+    function render() {
+      const t = txt[lang] || txt.en;
+      document.getElementById('mList').innerHTML = list.map((m, i) => {
         const s1 = m.score && m.score[0] ? `${m.score[0].r}/${m.score[0].w} (${m.score[0].o})` : '-';
         const s2 = m.score && m.score[1] ? `${m.score[1].r}/${m.score[1].w} (${m.score[1].o})` : '-';
-        return `<div class="card" onclick="openMatch(${idx})">
-          <div style="display:flex; justify-content:space-between; font-size:12px; color:#94a3b8;"><span>${(m.matchType||'CRICKET').toUpperCase()} • ${m.date}</span><span class="badge">LIVE</span></div>
-          <div class="row"><span>${m.teams[0] || 'Team 1'}</span><span>${s1}</span></div>
-          <div class="row"><span>${m.teams[1] || 'Team 2'}</span><span>${s2}</span></div>
-          <div class="status"><span>${m.status}</span><span style="color:#00e676;">${t.sc}</span></div>
+        return `<div class="card" onclick="detail(${i})">
+          <div style="font-size:11px;color:#00e676;font-weight:bold;">● LIVE / RECENT</div>
+          <div class="row"><span>${m.teams[0]||'Team 1'}</span><span>${s1}</span></div>
+          <div class="row"><span>${m.teams[1]||'Team 2'}</span><span>${s2}</span></div>
+          <div style="font-size:12px;color:#fbbf24;margin-top:6px;display:flex;justify-content:space-between;"><span>${m.status}</span><span style="color:#00e676;">${t.sc}</span></div>
         </div>`;
       }).join('');
     }
 
-    async function openMatch(idx) {
-      const m = allData[idx];
-      document.getElementById('detailModal').style.display = 'flex';
-      const box = document.getElementById('detailContent');
-      box.innerHTML = `<h3 style="color:#00e676;">${m.name}</h3><p style="font-size:13px; color:#fbbf24; margin:6px 0;">${m.status}</p><p style="font-size:12px; color:#94a3b8;">🏟️ Stadium: ${m.venue || 'N/A'}</p><hr style="border-color:#263554; margin:12px 0;"><div id="scBox">Loading full scorecard...</div>`;
+    async function detail(i) {
+      const m = list[i];
+      document.getElementById('dMod').style.display = 'flex';
+      document.getElementById('dBody').innerHTML = `<h3 style="color:#00e676;">${m.name}</h3><p style="color:#fbbf24;font-size:13px;margin:6px 0;">${m.status}</p><p style="color:#94a3b8;font-size:12px;">🏟️ ${m.venue||'N/A'}</p><div id="scArea" style="margin-top:12px;">Loading scorecard...</div>`;
       try {
-        const r = await fetch('https://api.cricapi.com/v1/match_scorecard?apikey=' + API_KEY + '&id=' + m.id);
+        const r = await fetch(`https://api.cricapi.com/v1/match_scorecard?apikey=${KEY}&id=${m.id}`);
         const j = await r.json();
         if (j.status === 'success' && j.data && j.data.scorecard && j.data.scorecard.length) {
-          document.getElementById('scBox').innerHTML = j.data.scorecard.map(inn => `
-            <h4 style="color:#38bdf8; margin-top:12px;">${inn.inning}</h4>
-            <table><tr><th>Batsman (Tap for Career)</th><th>R</th><th>B</th><th>4s</th><th>6s</th></tr>
-            ${(inn.batting||[]).map(b => `<tr><td><span class="p-link" onclick="openPlayer('${b.batsman.id}','${b.batsman.name.replace(/'/g,'')}')">${b.batsman.name}</span><br><small style="color:#94a3b8;">${b['dismissal-text']||'not out'}</small></td><td>${b.r}</td><td>${b.b}</td><td>${b['4s']}</td><td>${b['6s']}</td></tr>`).join('')}
-            </table>
-            <table><tr><th>Bowler</th><th>O</th><th>R</th><th>W</th><th>ECO</th></tr>
-            ${(inn.bowling||[]).map(bw => `<tr><td><span class="p-link" onclick="openPlayer('${bw.bowler.id}','${bw.bowler.name.replace(/'/g,'')}')">${bw.bowler.name}</span></td><td>${bw.o}</td><td>${bw.r}</td><td style="color:#00e676;">${bw.w}</td><td>${bw.eco}</td></tr>`).join('')}
-            </table>`).join('');
-        } else {
-          document.getElementById('scBox').innerHTML = `<p style="font-size:13px; color:#94a3b8;">Detailed ball-by-ball scorecard will update once live innings data arrives.</p>`;
-        }
-      } catch (e) {}
+          document.getElementById('scArea').innerHTML = j.data.scorecard.map(inn => `<h4 style="color:#38bdf8;margin-top:10px;">${inn.inning}</h4><table><tr><th>Batsman</th><th>R</th><th>B</th><th>4s</th><th>6s</th></tr>${(inn.batting||[]).map(b=>`<tr><td>${b.batsman.name}</td><td>${b.r}</td><td>${b.b}</td><td>${b['4s']}</td><td>${b['6s']}</td></tr>`).join('')}</table>`).join('');
+        } else { document.getElementById('scArea').innerHTML = `<p style="font-size:13px;color:#94a3b8;">Scorecard updates live during match.</p>`; }
+      } catch(e) {}
     }
 
-    async function openPlayer(pid, pname) {
-      document.getElementById('playerModal').style.display = 'flex';
-      const box = document.getElementById('playerContent');
-      box.innerHTML = `<h3 style="color:#00e676;">${pname}</h3><p style="font-size:12px; color:#94a3b8;">Loading career table...</p>`;
-      try {
-        const r = await fetch('https://api.cricapi.com/v1/players_info?apikey=' + API_KEY + '&id=' + pid);
-        const j = await r.json();
-        if (j.status === 'success' && j.data) {
-          const st = j.data.stats || [];
-          const val = (fn, fmt, k) => { const f = st.find(x => x.fn===fn && x.matchtype===fmt && x.stat===k); return f && f.value ? f.value : '-'; };
-          const fmts = ['test','odi','t20i','ipl'];
-          const rows = [['Matches','m'],['Runs','runs'],['Highest','hs'],['Average','avg'],['Strike Rate','sr'],['Wickets','wkts'],['Economy','econ']].map(row => `<tr><td><b>${row[0]}</b></td>${fmts.map(f => `<td>${val(row[1]==='wkts'||row[1]==='econ'?'bowling':'batting', f, row[1])}</td>`).join('')}</tr>`).join('');
-          box.innerHTML = `<h3 style="color:#00e676;">${j.data.name}</h3><p style="font-size:12px; color:#38bdf8;">${j.data.country||''} • ${j.data.role||''}</p>
-            <table><tr><th>Stat</th><th>Test</th><th>ODI</th><th>T20I</th><th>IPL</th></tr>${rows}</table>`;
-        }
-      } catch (e) {}
-    }
-
-    const channels = [
-      { name: "Red Bull TV (24/7 Sports)", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8" },
-      { name: "FIFA+ Live Football", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8" },
-      { name: "Dubai Sports 1", url: "https://dmisxthvll.cdn.mgmlcdn.com/dubaisports/smil:dubaisports.stream.smil/playlist.m3u8" },
-      { name: "Dubai Sports 2", url: "https://dmisxthvll.cdn.mgmlcdn.com/dubaisports2/smil:dubaisports2.stream.smil/playlist.m3u8" },
-      { name: "Sharjah Sports HD", url: "https://svs.itworkscdn.net/smc4sportslive/smc4.smil/playlist.m3u8" },
-      { name: "Trace Sport Stars", url: "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01076-tracetv-tracesport-samsunguk/playlist.m3u8" }
+    const tvs = [
+      { name:"Red Bull TV (Sports)", url:"https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8" },
+      { name:"FIFA+ Live Football", url:"https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8" },
+      { name:"Dubai Sports 1", url:"https://dmisxthvll.cdn.mgmlcdn.com/dubaisports/smil:dubaisports.stream.smil/playlist.m3u8" },
+      { name:"Dubai Sports 2", url:"https://dmisxthvll.cdn.mgmlcdn.com/dubaisports2/smil:dubaisports2.stream.smil/playlist.m3u8" }
     ];
-    document.getElementById('tvList').innerHTML = channels.map((c, i) => `<div class="card" onclick="playTv(${i})"><div style="font-size:11px; color:#00e676;">● LIVE HD</div><div style="font-weight:bold; margin-top:4px;">${c.name}</div></div>`).join('');
+    document.getElementById('tvGrid').innerHTML = tvs.map((c,i)=>`<div class="card" onclick="playTv(${i})"><div style="font-size:11px;color:#00e676;">● LIVE TV</div><div style="font-weight:bold;margin-top:4px;">${c.name}</div></div>`).join('');
 
-    let hls = null, tmr = null;
+    let hls=null, tm=null;
     function playTv(i) {
-      const ch = channels[i], ad = document.getElementById('adBox'), sec = document.getElementById('sec'), vid = document.getElementById('tvVid');
-      document.getElementById('tvStatus').innerText = "Loading: " + ch.name;
-      vid.pause(); clearInterval(tmr);
-      let s = 10; sec.innerText = s; ad.style.display = 'flex';
-      tmr = setInterval(() => {
-        s--; sec.innerText = s;
+      const c = tvs[i], ad = document.getElementById('ad'), cnt = document.getElementById('cnt'), v = document.getElementById('vid');
+      document.getElementById('tvMsg').innerText = "Loading: " + c.name;
+      v.pause(); clearInterval(tm);
+      let s = 10; cnt.innerText = s; ad.style.display = 'flex';
+      tm = setInterval(() => {
+        s--; cnt.innerText = s;
         if (s <= 0) {
-          clearInterval(tmr); ad.style.display = 'none';
-          document.getElementById
+          clearInterval(tm); ad.style.display = 'none';
+          document.getElementById('tvMsg').innerText = "▶️ Live: " + c.name;
+          if (Hls.isSupported()) { if(hls)hls.destroy(); hls=new Hls(); hls.loadSource(c.url); hls.attachMedia(v); hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play()); }
+          else { v.src=c.url; v.play(); }
+        }
+      }, 1000);
+    }
+
+    function tab(id, b) {
+      document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+      document.getElementById(id).classList.add('active'); b.classList.add('active');
+    }
+    load();
+  </script>
+</body>
+</html>
