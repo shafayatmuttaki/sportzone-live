@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SportZone Live - Cricket & Football</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --card-bg: #151c2c;
+      --accent: #00e676;
+      --accent-red: #ff3d57;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Hind Siliguri', sans-serif; }
+    body { background: var(--bg-dark); color: var(--text-main); padding-bottom: 80px; }
+
+    header {
+      background: #111827;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1f2937;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
+    .logo span { color: #fff; }
+    .live-badge {
+      background: var(--accent-red);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+    .tabs {
+      display: flex;
+      background: #111827;
+      padding: 8px 12px;
+      gap: 8px;
+      overflow-x: auto;
+      border-bottom: 1px solid #1f2937;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--card-bg);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .tab-btn.active { background: var(--accent); color: #000; }
+
+    .container { padding: 14px; max-width: 720px; margin: auto; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .section-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: #e2e8f0; }
+
+    .player-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid #263147;
+    }
+    video, iframe { width: 100%; height: 100%; border: none; }
+
+    #adOverlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(11, 15, 25, 0.96);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      text-align: center;
+      z-index: 20;
+    }
+    .ad-box-demo {
+      width: 90%;
+      max-width: 320px;
+      height: 110px;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px dashed var(--accent);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 10px;
+    }
+    .countdown-pill {
+      background: #1f2937;
+      color: var(--accent);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid #1f2937;
+      cursor: pointer;
+    }
+    .card:active { transform: scale(0.98); border-color: var(--accent); }
+    .card-tag { font-size: 11px; color: var(--accent); font-weight: 600; margin-bottom: 4px; display: block; }
+    .card-title { font-size: 14px; font-weight: 700; line-height: 1.3; }
+    .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .yt-card {
+      display: flex;
+      gap: 10px;
+      background: var(--card-bg);
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #1f2937;
+      cursor: pointer;
+    }
+    .yt-thumb { width: 115px; height: 68px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #000; }
+    .yt-info h4 { font-size: 13px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .yt-info span { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block; }
+
+    .score-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-left: 4px solid var(--accent);
+    }
+    .score-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+    .team-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; margin: 4px 0; }
+    .score-status { font-size: 12px; color: var(--accent); margin-top: 8px; }
+
+    .bottom-ad-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 58px;
+      background: #111827;
+      border-top: 1px solid #263147;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">Sport<span>Zone</span></div>
+    <div class="live-badge">● AUTO LIVE</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('livetv', this)">📺 Live TV & Matches</button>
+    <button class="tab-btn" onclick="switchTab('youtube', this)">🎬 Auto Highlights</button>
+    <button class="tab-btn" onclick="switchTab('scores', this)">🏏 Live Scores</button>
+  </div>
+
+  <div class="container">
+    <div id="livetv" class="section active">
+      <div class="player-wrapper">
+        <div id="adOverlay">
+          <div class="ad-box-demo" id="preRollAdSlot">
+            <strong style="color:#00e676; font-size:14px;">SPONSORED AD (300x100)</strong>
+            <span style="font-size:11px; color:#94a3b8; margin-top:4px;">আপনার অ্যাড নেটওয়ার্কের ব্যানার এখানে দেখাবে</span>
+          </div>
+          <div class="countdown-pill">ভিডিও শুরু হতে বাকি: <span id="timerCount">10</span> সেকেন্ড...</div>
+        </div>
+        <video id="hlsPlayer" controls playsinline></video>
+      </div>
+
+      <div class="section-title">📡 ফ্রি-টু-এয়ার ও বৈধ লাইভ চ্যানেল</div>
+      <div class="grid" id="channelGrid"></div>
+    </div>
+
+    <div id="youtube" class="section">
+      <div class="player-wrapper">
+        <iframe id="ytPlayer" src="" allowfullscreen></iframe>
+      </div>
+      <div class="section-title">⚡ অটো-আপডেটেড অফিসিয়াল হাইলাইটস ও লাইভ</div>
+      <div id="ytList">লোড হচ্ছে...</div>
+    </div>
+
+    <div id="scores" class="section">
+      <div class="section-title">📊 লাইভ ম্যাচ আপডেট (অটো ফিড)</div>
+      <div id="scoreList"></div>
+    </div>
+  </div>
+
+  <div class="bottom-ad-banner" id="bottomBannerAd">
+    <span>[ Banner Ad Space: 320x50 ]</span>
+  </div>
+
+  <script>
+    const freeChannels = [
+      { name: "Red Bull TV (24/7 Sports)", category: "Live Sports", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8" },
+      { name: "FIFA+ Live Football", category: "Football", url: "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8" },
+      { name: "Dubai Sports 1", category: "Cricket & Football", url: "https://dmisxthvll.cdn.mgmlcdn.com/dubaisports/smil:dubaisports.stream.smil/playlist.m3u8" },
+      { name: "Trace Sport Stars", category: "Sports News", url: "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01076-tracetv-tracesport-samsunguk/playlist.m3u8" }
+    ];
+
+    let hls = null;
+    let adInterval = null;
+
+    const channelGrid = document.getElementById('channelGrid');
+    freeChannels.forEach((ch) => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `<span class="card-tag">● ${ch.category}</span><div class="card-title">${ch.name}</div><div class="card-sub">HD Stream • Auto Server</div>`;
+      div.onclick = () => startChannelWithAd(ch.url);
+      channelGrid.appendChild(div);
+    });
+
+    function startChannelWithAd(streamUrl) {
+      const overlay = document.getElementById('adOverlay');
+      const timerSpan = document.getElementById('timerCount');
+      const video = document.getElementById('hlsPlayer');
+
+      video.pause();
+      clearInterval(adInterval);
+
+      let secondsLeft = 10;
+      timerSpan.innerText = secondsLeft;
+      overlay.style.display = 'flex';
+
+      adInterval = setInterval(() => {
+        secondsLeft--;
+        timerSpan.innerText = secondsLeft;
+        if (secondsLeft <= 0) {
+          clearInterval(adInterval);
+          overlay.style.display = 'none';
+          playHlsStream(streamUrl);
+        }
+      }, 1000);
+    }
+
+    function playHlsStream(url) {
+      const video = document.getElementById('hlsPlayer');
+      if (Hls.isSupported()) {
+        if (hls) hls.destroy();
+        hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.play();
+      }
+    }
+
+    async function loadAutoYouTubeVideos() {
+      const ytList = document.getElementById('ytList');
+      const rssUrl = encodeURIComponent("https://www.youtube.com/feeds/videos.xml?channel_id=UCt2jxGk2fw704_7yX20r-2w");
+      try {
+        const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`);
+        const data = await res.json();
+        if (data.items && data.items.length > 0) {
+          ytList.innerHTML = "";
+          const firstVidId = data.items[0].guid.split(":")[2];
+          document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${firstVidId}`;
+
+          data.items.slice(0, 8).forEach(item => {
+            const vidId = item.guid.split(":")[2];
+            const card = document.createElement('div');
+            card.className = 'yt-card';
+            card.innerHTML = `
+              <img class="yt-thumb" src="https://i.ytimg.com/vi/${vidId}/mqdefault.jpg" alt="thumb">
+              <div class="yt-info">
+                <h4>${item.title}</h4>
+                <span>${item.author} • Auto Updated</span>
+              </div>
+            `;
+            card.onclick = () => {
+              document.getElementById('ytPlayer').src = `https://www.youtube.com/embed/${vidId}?autoplay=1`;
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            ytList.appendChild(card);
+          });
+        }
+      } catch (e) {
+        ytList.innerHTML = "<p style='color:#94a3b8; font-size:13px;'>ইন্টারনেট সংযোগ চেক করুন অথবা কিছুক্ষণ পর রিফ্রেশ দিন।</p>";
+      }
+    }
+
+    function loadSampleScores() {
+      const scoreList = document.getElementById('scoreList');
+      scoreList.innerHTML = `
+        <div class="score-card">
+          <div class="score-header"><span>INTERNATIONAL T20 • LIVE</span><span>Auto Sync</span></div>
+          <div class="team-row"><span>🇧🇩 Bangladesh</span><span>178/6 (20.0)</span></div>
+          <div class="team-row"><span>🇱🇰 Sri Lanka</span><span>142/5 (16.4)</span></div>
+          <div class="score-status">Sri Lanka need 37 runs in 20 balls</div>
+        </div>
+        <div class="score-card">
+          <div class="score-header"><span>PREMIER LEAGUE • 78'</span><span>Auto Sync</span></div>
+          <div class="team-row"><span>Arsenal</span><span>2</span></div>
+          <div class="team-row"><span>Liverpool</span><span>1</span></div>
+          <div class="score-status">2nd Half • Live Match Tracker Active</div>
+        </div>
+      `;
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    loadAutoYouTubeVideos();
+    loadSampleScores();
+  </script>
+</body>
+</html>
